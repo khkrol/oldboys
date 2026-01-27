@@ -3,24 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potter's Scoutscore</title>
+    <title>Hattrick Scoutscore</title>
     
-    <link rel="apple-touch-icon" href="Logo.jpg">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="icon" href="logo.png">
     <meta name="mobile-web-app-capable" content="yes">
 
     <style>
+        /* Hattrick Kleurenpalet */
         :root {
-            --gold: #c5a059;
-            --black: #1a1a1a;
-            --dark-grey: #2d2d2d;
+            --ht-green: #3D7C3B;    /* De hoofdkleur groen van Hattrick */
+            --ht-yellow: #FFC200;   /* De kleur van het sterretje/accenten */
+            --ht-bg: #F0F4F0;       /* Lichte achtergrond */
+            --ht-text: #333333;     /* Donkere tekst voor leesbaarheid */
             --white: #ffffff;
-            --excel-yellow: #ffff00;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--black);
-            color: var(--white);
+            font-family: Verdana, 'Segoe UI', sans-serif; /* Hattrick gebruikt vaak Verdana-achtige fonts */
+            background-color: var(--ht-bg);
+            color: var(--ht-text);
             margin: 0;
             padding: 15px;
             display: flex;
@@ -29,62 +31,131 @@
 
         .app-container {
             width: 100%;
-            max-width: 420px;
-            background-color: var(--dark-grey);
-            border-radius: 20px;
-            border: 2px solid var(--gold);
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 450px;
+            background-color: var(--white);
+            border-radius: 8px;
+            border-top: 4px solid var(--ht-green); /* Groene bovenrand zoals op de site */
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .header { text-align: center; margin-bottom: 20px; }
-        .logo { width: 80px; height: auto; border-radius: 50%; border: 2px solid var(--gold); margin-bottom: 10px; }
-        h1 { color: var(--gold); font-size: 1.4em; margin: 0; text-transform: uppercase; }
+        .header { 
+            text-align: center; 
+            margin-bottom: 25px; 
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        .logo { 
+            width: 180px; /* Breder logo nu */
+            height: auto; 
+            margin-bottom: 10px; 
+        }
+        h1 { 
+            color: var(--ht-green); 
+            font-size: 1.3em; 
+            margin: 0; 
+            text-transform: uppercase; 
+            font-weight: bold;
+        }
 
         .input-group { margin-bottom: 15px; }
-        label { display: block; font-size: 0.85em; margin-bottom: 5px; color: var(--gold); font-weight: bold; }
+        label { 
+            display: block; 
+            font-size: 0.9em; 
+            margin-bottom: 5px; 
+            color: var(--ht-green); 
+            font-weight: bold; 
+        }
 
         select {
             width: 100%;
             padding: 12px;
-            border-radius: 10px;
-            border: 1px solid #444;
-            background-color: var(--black);
-            color: var(--white);
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fcfcfc;
+            color: var(--ht-text);
             font-size: 16px;
-            -webkit-appearance: none; /* Zorgt voor betere look op iPhone */
+            outline: none;
         }
+        select:focus { border-color: var(--ht-green); }
 
-        .result-scoutscore {
-            margin-top: 20px;
-            background-color: var(--gold);
-            color: var(--black);
+        /* Resultaten sectie strakker gemaakt */
+        .results-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .result-box {
+            flex: 1;
             padding: 15px;
-            border-radius: 12px;
+            border-radius: 8px;
             text-align: center;
         }
 
+        .scoutscore-box {
+            background-color: var(--ht-green);
+            color: var(--white);
+        }
+        
         .skill-box {
-            margin-top: 15px;
-            background-color: var(--excel-yellow);
-            color: #000;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            font-weight: bold;
+            background-color: var(--ht-yellow);
+            color: var(--ht-text);
+            border: 1px solid #e0a800;
         }
 
-        .label-small { font-size: 0.8em; text-transform: uppercase; letter-spacing: 1px; }
-        .val-large { font-size: 2.5em; font-weight: bold; margin: 2px 0; }
-        .val-medium { font-size: 1.2em; }
+        .label-small { font-size: 0.75em; text-transform: uppercase; font-weight: bold; opacity: 0.9; }
+        .val-large { font-size: 2em; font-weight: bold; margin: 5px 0; }
+        .val-medium { font-size: 1.1em; font-weight: bold; margin: 5px 0;}
+
+        /* Emile footer sectie */
+        .emile-footer {
+            margin-top: 30px;
+            border-top: 2px dotted #ccc;
+            padding-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .emile-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--ht-green);
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .emile-quote-box {
+            flex: 1;
+            font-style: italic;
+            color: #555;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ht-yellow);
+        }
+
+        .emile-name {
+            font-weight: bold;
+            color: var(--ht-green);
+            font-style: normal;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #emileQuoteWord {
+            font-weight: bold;
+            color: var(--ht-green);
+        }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="header">
-        <img src="Logo.jpg" alt="Logo" class="logo">
-        <h1>Potter's Scoutscore</h1>
+        <img src="logo.png" alt="Hattrick Logo" class="logo">
+        <h1>Scoutscore Calculator</h1>
     </div>
 
     <div class="input-group">
@@ -98,39 +169,39 @@
     <div class="input-group">
         <label>Huidig vaardigheidsniveau</label>
         <select id="huidig" onchange="bereken()">
-            <option value="0">Onbekend</option><option value="0">Niet-bestaand</option><option value="1">Rampzalig</option>
-            <option value="2">Waardeloos</option><option value="3">Slecht</option><option value="4" selected>Zwak</option>
-            <option value="5">Matig</option><option value="6">Redelijk</option><option value="7">Goed</option>
-            <option value="8">Uitstekend</option><option value="9">Formidabel</option><option value="10">Uitmuntend</option>
-            <option value="11">Briljant</option><option value="12">Wonderbaarlijk</option><option value="13">Wereldklasse</option>
-            <option value="14">Bovennatuurlijk</option><option value="15">Reusachtig</option><option value="16">Buitenaards</option>
-            <option value="17">Mythisch</option><option value="18">Magisch</option><option value="19">Utopisch</option><option value="20">Goddelijk</option>
+            <option value="0">Onbekend (0)</option><option value="0">Niet-bestaand (0)</option><option value="1">Rampzalig (1)</option>
+            <option value="2">Waardeloos (2)</option><option value="3">Slecht (3)</option><option value="4" selected>Zwak (4)</option>
+            <option value="5">Matig (5)</option><option value="6">Redelijk (6)</option><option value="7">Goed (7)</option>
+            <option value="8">Uitstekend (8)</option><option value="9">Formidabel (9)</option><option value="10">Uitmuntend (10)</option>
+            <option value="11">Briljant (11)</option><option value="12">Wonderbaarlijk (12)</option><option value="13">Wereldklasse (13)</option>
+            <option value="14">Bovennatuurlijk (14)</option><option value="15">Reusachtig (15)</option><option value="16">Buitenaards (16)</option>
+            <option value="17">Mythisch (17)</option><option value="18">Magisch (18)</option><option value="19">Utopisch (19)</option><option value="20">Goddelijk (20)</option>
         </select>
     </div>
 
     <div class="input-group">
         <label>Potentieel vaardigheidsniveau</label>
         <select id="potentieel" onchange="bereken()">
-            <option value="0">Onbekend</option><option value="0">Niet-bestaand</option><option value="1">Rampzalig</option>
-            <option value="2">Waardeloos</option><option value="3">Slecht</option><option value="4">Zwak</option>
-            <option value="5">Matig</option><option value="6">Redelijk</option><option value="7" selected>Goed</option>
-            <option value="8">Uitstekend</option><option value="9">Formidabel</option><option value="10">Uitmuntend</option>
-            <option value="11">Briljant</option><option value="12">Wonderbaarlijk</option><option value="13">Wereldklasse</option>
-            <option value="14">Bovennatuurlijk</option><option value="15">Reusachtig</option><option value="16">Buitenaards</option>
-            <option value="17">Mythisch</option><option value="18">Magisch</option><option value="19">Utopisch</option><option value="20">Goddelijk</option>
+            <option value="0">Onbekend (0)</option><option value="0">Niet-bestaand (0)</option><option value="1">Rampzalig (1)</option>
+            <option value="2">Waardeloos (2)</option><option value="3">Slecht (3)</option><option value="4">Zwak (4)</option>
+            <option value="5">Matig (5)</option><option value="6">Redelijk (6)</option><option value="7" selected>Goed (7)</option>
+            <option value="8">Uitstekend (8)</option><option value="9">Formidabel (9)</option><option value="10">Uitmuntend (10)</option>
+            <option value="11">Briljant (11)</option><option value="12">Wonderbaarlijk (12)</option><option value="13">Wereldklasse (13)</option>
+            <option value="14">Bovennatuurlijk (14)</option><option value="15">Reusachtig (15)</option><option value="16">Buitenaards (16)</option>
+            <option value="17">Mythisch (17)</option><option value="18">Magisch (18)</option><option value="19">Utopisch (19)</option><option value="20">Goddelijk (20)</option>
         </select>
     </div>
 
     <div class="input-group">
         <label>Gemiddeld vaardigheidsniveau</label>
         <select id="gemiddeld" onchange="bereken()">
-            <option value="0" selected>Onbekend</option><option value="0">Niet-bestaand</option><option value="1">Rampzalig</option>
-            <option value="2">Waardeloos</option><option value="3">Slecht</option><option value="4">Zwak</option>
-            <option value="5">Matig</option><option value="6">Redelijk</option><option value="7">Goed</option>
-            <option value="8">Uitstekend</option><option value="9">Formidabel</option><option value="10">Uitmuntend</option>
-            <option value="11">Briljant</option><option value="12">Wonderbaarlijk</option><option value="13">Wereldklasse</option>
-            <option value="14">Bovennatuurlijk</option><option value="15">Reusachtig</option><option value="16">Buitenaards</option>
-            <option value="17">Mythisch</option><option value="18">Magisch</option><option value="19">Utopisch</option><option value="20">Goddelijk</option>
+            <option value="0" selected>Onbekend (0)</option><option value="0">Niet-bestaand (0)</option><option value="1">Rampzalig (1)</option>
+            <option value="2">Waardeloos (2)</option><option value="3">Slecht (3)</option><option value="4">Zwak (4)</option>
+            <option value="5">Matig (5)</option><option value="6">Redelijk (6)</option><option value="7">Goed (7)</option>
+            <option value="8">Uitstekend (8)</option><option value="9">Formidabel (9)</option><option value="10">Uitmuntend (10)</option>
+            <option value="11">Briljant (11)</option><option value="12">Wonderbaarlijk (12)</option><option value="13">Wereldklasse (13)</option>
+            <option value="14">Bovennatuurlijk (14)</option><option value="15">Reusachtig (15)</option><option value="16">Buitenaards (16)</option>
+            <option value="17">Mythisch (17)</option><option value="18">Magisch (18)</option><option value="19">Utopisch (19)</option><option value="20">Goddelijk (20)</option>
         </select>
     </div>
 
@@ -142,15 +213,26 @@
         </select>
     </div>
 
-    <div class="result-scoutscore">
-        <div class="label-small">SCOUTSCORE</div>
-        <div class="val-large" id="scoreDisp">0,0</div>
+    <div class="results-container">
+        <div class="result-box scoutscore-box">
+            <div class="label-small">Scoutscore</div>
+            <div class="val-large" id="scoreDisp">0,0</div>
+        </div>
+
+        <div class="result-box skill-box">
+            <div class="label-small">Derde skill</div>
+            <div class="val-medium" id="skillDisp">-</div>
+        </div>
     </div>
 
-    <div class="skill-box">
-        <div class="label-small">Geschatte derde hoge skill</div>
-        <div class="val-medium" id="skillDisp">-</div>
+    <div class="emile-footer">
+        <img src="emile.jpg" alt="Emile 'De Neus' Muntz" class="emile-photo">
+        <div class="emile-quote-box">
+            <span class="emile-name">Emile 'De Neus' Muntz:</span>
+            "Dit is volgens mij een <span id="emileQuoteWord">...</span> talent!"
+        </div>
     </div>
+
 </div>
 
 <script>
@@ -163,32 +245,38 @@
     ];
 
     function bereken() {
-        // Waarden ophalen
         const lft = parseFloat(document.getElementById('leeftijd').value);
         const hui = parseFloat(document.getElementById('huidig').value);
         const pot = parseFloat(document.getElementById('potentieel').value);
         const gem = parseFloat(document.getElementById('gemiddeld').value);
         const spec = parseFloat(document.getElementById('spec').value);
 
-        // 1. Scoutscore
-        // Formule: (Lft*2) + (Huidig/8*2) + (Pot/8*2) + (Gem/8*3) + (Spec*1)
+        // 1. Scoutscore berekening
         const totaal = (lft * 2) + ((hui / 8) * 2) + ((pot / 8) * 2) + ((gem / 8) * 3) + (spec * 1);
         document.getElementById('scoreDisp').innerText = totaal.toFixed(1).replace('.', ',');
 
-        // 2. Derde skill
-        // Formule: =AFRONDEN((Gem*3)-Hui-Pot;0)
-        let index = Math.round((gem * 3) - hui - pot);
-        
-        // Correctie voor de lijstindex (zorg dat het tussen 0 en 20 blijft)
-        // Omdat 'Onbekend' op index 0 staat en 'Niet-bestaand' op 1 (waarde 0)
-        let displayIndex = index + 1;
-        if (displayIndex < 1) displayIndex = 1;
-        if (displayIndex > 21) displayIndex = 21;
+        // 2. Derde skill berekening
+        let indexSkill = Math.round((gem * 3) - hui - pot);
+        let safeIndexSkill = Math.max(0, Math.min(21, indexSkill + 1));
+        document.getElementById('skillDisp').innerText = niveaus[safeIndexSkill];
 
-        document.getElementById('skillDisp').innerText = niveaus[displayIndex];
+        // 3. Emile's Quote berekening (#WAARDE#)
+        // We ronden de totale scoutscore af naar het dichtstbijzijnde hele getal.
+        let afgerondeScore = Math.round(totaal);
+        
+        // We vertalen het getal naar het woord in de lijst.
+        // De lijst 'niveaus' begint bij index 0 (Onbekend).
+        // Een score van 7 moet 'Goed' zijn. 'Goed' staat op index 8.
+        // Dus we doen score + 1 om de juiste index te vinden.
+        let quoteIndex = afgerondeScore + 1;
+
+        // Veiligheidscheck: zorg dat we niet buiten de lijst zoeken (min 0, max 21)
+        quoteIndex = Math.max(0, Math.min(21, quoteIndex));
+        
+        // Update de tekst van Emile
+        document.getElementById('emileQuoteWord').innerText = niveaus[quoteIndex].toLowerCase();
     }
 
-    // Start direct bij laden
     window.onload = bereken;
 </script>
 
