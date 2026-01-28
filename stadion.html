@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stadion Calculator - Potter's Old Boys</title>
+    
+    <link rel="apple-touch-icon" href="potters.jpg">
+    <link rel="icon" href="potters.jpg">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <style>
+        :root {
+            --ht-green: #3D7C3B;
+            --ht-yellow: #FFC200;
+            --ht-bg: #F0F4F0;
+            --ht-text: #333333;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: Verdana, 'Segoe UI', sans-serif;
+            background-color: var(--ht-bg);
+            color: var(--ht-text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--white);
+            border-radius: 8px;
+            border-top: 4px solid var(--ht-green);
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: 25px; 
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .ht-logo { width: 150px; height: auto; }
+        .pob-logo { width: 70px; height: auto; }
+
+        h1 { color: var(--ht-green); font-size: 1.3em; margin: 0; text-transform: uppercase; font-weight: bold; }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.9em; margin-bottom: 5px; color: var(--ht-green); font-weight: bold; }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: #fcfcfc;
+            color: var(--ht-text);
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .total-banner {
+            background-color: var(--ht-yellow);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .total-val { font-size: 2em; color: var(--ht-green); display: block; }
+
+        .sector-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .sector-table th { background-color: var(--ht-green); color: white; text-align: left; padding: 10px; }
+        .sector-table td { padding: 10px; border-bottom: 1px solid #eee; }
+
+        /* Donnie footer & Infoknop */
+        .donnie-footer {
+            margin-top: 30px;
+            border-top: 2px dotted #ccc;
+            padding-top: 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .donnie-photo { width: 80px; height: auto; margin-right: 15px; }
+
+        .donnie-quote-box {
+            flex: 1;
+            font-style: italic;
+            color: #555;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ht-yellow);
+            position: relative;
+        }
+
+        .donnie-name { font-weight: bold; color: var(--ht-green); display: block; margin-bottom: 5px; font-style: normal; }
+
+        .info-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            background: var(--ht-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: serif;
+        }
+
+        /* Modal (Uitleg venster) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        .modal-header {
+            color: var(--ht-green);
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .close-btn {
+            background: var(--ht-green);
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-container">
+            <img src="logo.png" alt="Hattrick" class="ht-logo">
+            <img src="potters.jpg" alt="Potters" class="pob-logo">
+        </div>
+        <h1>Stadion Calculator</h1>
+    </div>
+
+    <div class="input-group">
+        <label>Grootte fanclub</label>
+        <input type="number" id="fans" value="1500" oninput="berekenStadion()">
+    </div>
+
+    <div class="input-group">
+        <label>Stemming van de supporters</label>
+        <select id="stemming" onchange="berekenStadion()">
+            <option value="11.53">Onthutst (furious)</option>
+            <option value="13.09">Woedend (angry)</option>
+            <option value="14.63">Geïrriteerd (irritated)</option>
+            <option value="16.17">Teleurgesteld (disappointed)</option>
+            <option value="17.72">Kalm (calm)</option>
+            <option value="19.27">Tevreden (content)</option>
+            <option value="20.83" selected>Verheugd (satisfied)</option>
+            <option value="22.39">Dolblij (delirious)</option>
+            <option value="23.95">In de zevende hemel (high on life)</option>
+            <option value="25.52">De polonaise (dancing in the streets)</option>
+            <option value="27.09">Liefdesverklaringen (sending love poems)</option>
+        </select>
+    </div>
+
+    <div class="total-banner">
+        TOTAAL CAPACITEIT
+        <span class="total-val" id="totaalDisplay">31.002</span>
+    </div>
+
+    <table class="sector-table">
+        <thead>
+            <tr><th>Sector</th><th>Aantal</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Staanplaatsen</td><td id="resStaan">17.862</td></tr>
+            <tr><td>Zitplaatsen</td><td id="resZit">6.736</td></tr>
+            <tr><td>Zitplaatsen overdekt</td><td id="resDak">5.716</td></tr>
+            <tr><td>VIP-boxen (incl. Martin en Klaas)</td><td id="resVip">688</td></tr>
+        </tbody>
+    </table>
+
+    <div class="donnie-footer">
+        <img src="donnie.jpg" alt="Donnie" class="donnie-photo">
+        <div class="donnie-quote-box">
+            <button class="info-btn" onclick="openModal()">i</button>
+            <span class="donnie-name">Donnie:</span>
+            "Dit stadion is precies groot genoeg voor een flinke polonaise!"
+        </div>
+    </div>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Hoe wordt dit berekend?</div>
+        <p><strong>1. Basis Capaciteit:</strong> De grootte van de fanclub wordt vermenigvuldigd met de multiplier van de supportersstemming.</p>
+        <p><strong>2. Afronding:</strong> Dit getal wordt afgerond op het dichtstbijzijnde duizendtal.</p>
+        <p><strong>3. Martin en Klaas Bonus:</strong> Er worden standaard 2 extra VIP-plaatsen toegevoegd aan het totaal.</p>
+        <p><strong>4. Sectoren:</strong> De verdeling is gebaseerd op officiële Hattrick-data:<br>
+        - Staanplaatsen: 57,62%<br>
+        - Zitplaatsen: 21,73%<br>
+        - Overdekt: 18,44%<br>
+        - VIP: Restant (zorgt voor totaal eindigend op 2).</p>
+        <button class="close-btn" onclick="closeModal()">Sluiten</button>
+    </div>
+</div>
+
+<script>
+    function berekenStadion() {
+        const fans = parseFloat(document.getElementById('fans').value) || 0;
+        const multiplier = parseFloat(document.getElementById('stemming').value);
+
+        const idealeCapaciteit = fans * multiplier;
+        const afgerondDuizendtal = Math.round(idealeCapaciteit / 1000) * 1000;
+        const totaalDoel = afgerondDuizendtal + 2;
+
+        const staan = Math.round(afgerondDuizendtal * 0.5762);
+        const zit = Math.round(afgerondDuizendtal * 0.2173);
+        const dak = Math.round(afgerondDuizendtal * 0.1844);
+        const vipTotaal = totaalDoel - staan - zit - dak;
+
+        document.getElementById('totaalDisplay').innerText = totaalDoel.toLocaleString('nl-NL');
+        document.getElementById('resStaan').innerText = staan.toLocaleString('nl-NL');
+        document.getElementById('resZit').innerText = zit.toLocaleString('nl-NL');
+        document.getElementById('resDak').innerText = dak.toLocaleString('nl-NL');
+        document.getElementById('resVip').innerText = vipTotaal.toLocaleString('nl-NL');
+    }
+
+    function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+
+    window.onload = berekenStadion;
+</script>
+
+</body>
+</html>
