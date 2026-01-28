@@ -129,13 +129,12 @@
         .val-large { font-size: 2em; font-weight: bold; margin: 5px 0; }
         .val-medium { font-size: 1.1em; font-weight: bold; margin: 5px 0; }
 
-        /* Footer styling gelijk aan Scoutscore */
         .footer-advice {
             margin-top: 30px;
             border-top: 2px dotted #ccc;
             padding-top: 20px;
             display: flex;
-            align-items: flex-start; /* Veranderd naar flex-start voor betere uitlijning */
+            align-items: flex-start;
         }
 
         .footer-photo {
@@ -177,7 +176,6 @@
         
         .warning { color: #d9534f; font-weight: bold; font-size: 0.8em; margin-top: 5px; display: none; }
 
-        /* Nieuwe styles voor de info-button en uitleg */
         .info-btn {
             background-color: var(--ht-green);
             color: white;
@@ -196,7 +194,7 @@
         }
 
         .explanation-panel {
-            display: none; /* Standaard verborgen */
+            display: none;
             margin-top: 10px;
             background-color: #fff;
             border: 1px solid #ddd;
@@ -303,7 +301,7 @@
     <div class="results-container">
         <div class="result-box rating-box">
             <div class="label-small">COUNTEREFFECTIVITEIT</div>
-            <div class="val-large" id="ratingVal">0/7</div>
+            <div class="val-large" id="ratingVal">0/20</div>
             <div style="font-size: 0.8em;" id="ratingLabel">Niet-bestaand</div>
         </div>
 
@@ -436,41 +434,44 @@
             deltaXg += bonus; 
         }
 
-        let ratingVal = 0;
-        let adviesLabel = "Niet-bestaand"; 
-        
-        if (deltaXg < 0) { ratingVal = 0; }
-        else if (deltaXg < 0.2) { ratingVal = 1; }
-        else if (deltaXg < 0.5) { ratingVal = 2; }
-        else if (deltaXg < 0.8) { ratingVal = 3; }
-        else if (deltaXg < 1.2) { ratingVal = 4; }
-        else if (deltaXg < 1.6) { ratingVal = 5; }
-        else if (deltaXg < 2.0) { ratingVal = 6; }
-        else { ratingVal = 7; }
+        // --- NIEUWE LOGICA: SCHAAL 0 TOT 20 ---
+        const labels = [
+            "Niet-bestaand", "Rampzalig", "Waardeloos", "Slecht", "Zwak",
+            "Matig", "Redelijk", "Goed", "Uitstekend", "Formidabel",
+            "Uitmuntend", "Briljant", "Wonderbaarlijk", "Wereldklasse", "Bovennatuurlijk",
+            "Reusachtig", "Buitenaards", "Mythisch", "Magisch", "Utopisch", "Goddelijk"
+        ];
 
-        if (deltaXg >= 0) {
-            ratingVal = Math.min(7, ratingVal + 1);
+        let ratingIndex = 0;
+        let adviesLabel = labels[0]; 
+
+        // Als we het middenveld winnen is counteren onlogisch
+        if (posShareNorm > 0.55) {
+            ratingIndex = 0;
+        } else if (deltaXg <= 0) {
+            ratingIndex = 0;
+        } else {
+            // Mapping: deltaXg naar index 0-20
+            // We gebruiken factor 6 + 1. 
+            // Vb: 1.0 delta (sterk) = 7 (Goed). 3.0 delta (enorm) = 19 (Utopisch).
+            ratingIndex = Math.floor(deltaXg * 6) + 1;
+            if (ratingIndex > 20) ratingIndex = 20;
+            if (ratingIndex < 1) ratingIndex = 1;
         }
 
-        const labels = [
-            "Niet-bestaand", "Rampzalig", "Waardeloos", "Slecht", 
-            "Zwak", "Matig", "Redelijk", "Goed"
-        ];
-        adviesLabel = labels[ratingVal];
+        adviesLabel = labels[ratingIndex];
 
         let adviesZinHTML = ""; 
 
         if (posShareNorm > 0.55) {
-            ratingVal = 0;
-            adviesLabel = "Niet-bestaand";
             adviesZinHTML = "Je hebt het overwicht op het middenveld (>55%). Counteren is <span class='highlight'>tactisch onlogisch</span>.";
         } else if (deltaXg <= 0) {
             adviesZinHTML = "Counteren levert <span class='highlight'>geen voordeel</span> op. Je verliest meer kansen dan je wint.";
         } else {
-            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()}</span>. Counteren levert je een voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
+            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()} (${ratingIndex})</span>. Counteren levert je een voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
         }
 
-        document.getElementById('ratingVal').innerText = ratingVal + "/7";
+        document.getElementById('ratingVal').innerText = ratingIndex + "/20";
         document.getElementById('ratingLabel').innerText = adviesLabel;
         document.getElementById('deltaXg').innerText = (deltaXg > 0 ? "+" : "") + deltaXg.toFixed(2);
         document.getElementById('tlEff').innerText = tlEff.toFixed(1);
