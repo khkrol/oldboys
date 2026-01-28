@@ -46,13 +46,14 @@
             color: var(--white);
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.85em; /* Iets kleiner zodat het past op mobiel */
+            font-size: 0.80em; /* Ietsje kleiner gezet zodat 4 items goed passen */
             text-transform: uppercase;
             border-bottom: 4px solid transparent;
             transition: 0.3s;
             cursor: pointer;
             text-align: center;
-            padding: 0 5px;
+            padding: 0 2px;
+            line-height: 1.1; /* Zorgt dat 'Vrouw Fatu' netjes onder elkaar kan staan indien nodig */
         }
 
         .nav-item.active {
@@ -87,6 +88,10 @@
 
         <div class="nav-item" id="btnCounter" onclick="loadPage('counterhulp.html', 'btnCounter')">
             Counter
+        </div>
+
+        <div class="nav-item" id="btnFatu" onclick="loadPage('vrouwfatu.html', 'btnFatu')">
+            Vrouw Fatu
         </div>
     </nav>
 
