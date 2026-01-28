@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potter's Counterhulp</title>
+    <title>Potter's Counterhulp v2.4</title>
     
     <link rel="apple-touch-icon" href="potters.jpg">
     <link rel="icon" href="potters.jpg">
@@ -110,6 +110,9 @@
         .row-3 div {
             flex: 1;
         }
+        .row-3 input {
+            text-align: center;
+        }
 
         .results-container {
             display: flex;
@@ -122,16 +125,20 @@
             padding: 15px;
             border-radius: 8px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .rating-box { background-color: var(--ht-green); color: var(--white); }
         .delta-box { background-color: var(--ht-yellow); color: var(--ht-text); border: 1px solid #e0a800; }
 
-        .label-small { font-size: 0.65em; text-transform: uppercase; font-weight: bold; opacity: 0.9; }
-        .val-large { font-size: 2em; font-weight: bold; margin: 5px 0; }
+        .label-small { font-size: 0.65em; text-transform: uppercase; font-weight: bold; opacity: 0.9; margin-bottom: 5px; }
+        .val-large { font-size: 2em; font-weight: bold; margin: 0; line-height: 1.2; }
         .val-medium { font-size: 1.1em; font-weight: bold; margin: 5px 0; }
 
-        /* CHARACTER DISPLAY STYLE (Bovenaan) */
+        /* CHARACTER DISPLAY STYLE */
         .character-display {
             margin-top: 0;
             margin-bottom: 25px;
@@ -244,20 +251,28 @@
                 <span id="adviesText">...</span>
                 
                 <div id="extraInfo" class="explanation-panel">
-                    <div class="calc-head">SCENARIO NORMAAL</div>
-                    <div class="calc-row"><span>Balbezit:</span> <span class="calc-val" id="disp_pos_norm">50%</span></div>
-                    <div class="calc-row"><span>Kansen (Wij/Zij):</span> <span class="calc-val"><span id="disp_ch_self_norm">5.0</span> / <span id="disp_ch_opp_norm">5.0</span></span></div>
-                    <div class="calc-row"><span style="font-weight:bold;">xG Normaal:</span> <span class="calc-val" id="disp_xg_norm">0.00</span></div>
 
-                    <div class="calc-head">SCENARIO COUNTER</div>
-                    <div class="calc-row"><span>Middenveld (7% straf):</span> <span class="calc-val" id="disp_mid_pen">93%</span></div>
-                    <div class="calc-row"><span>Nieuwe kansen (Wij/Zij):</span> <span class="calc-val"><span id="disp_ch_self_ca">4.8</span> / <span id="disp_ch_opp_ca">5.2</span></span></div>
-                    <div class="calc-row"><span>Gemiste kansen tegenstander:</span> <span class="calc-val" id="disp_stops">0.0</span></div>
-                    <div class="calc-row"><span>Gewonnen counters:</span> <span class="calc-val" id="disp_extra_ca">0.0</span></div>
-                    <div class="calc-row"><span style="font-weight:bold;">xG Counter:</span> <span class="calc-val" id="disp_xg_ca">0.00</span></div>
+                    <div class="calc-head">BASIS (NORMAAL)</div>
+                    <div class="calc-row"><span>xG Normaal:</span> <span class="calc-val" id="disp_xg_norm">0.00</span></div>
 
-                    <div class="calc-head">RESULTAAT</div>
-                    <div class="calc-row"><span>Verschil (Delta):</span> <span class="calc-val" id="disp_delta">0.00</span></div>
+                    <div class="calc-head">EFFECT CA TACTIEK</div>
+                    <div class="calc-row">
+                        <span>Kosten (Middenveld straf):</span> 
+                        <span class="calc-val" id="disp_cost_pen" style="color:#d9534f;">-0.00</span>
+                    </div>
+                    <div style="font-size:0.7em; color:#888; margin-bottom:4px; text-align:right;">(minder eigen kansen + meer kansen tegen)</div>
+
+                    <div class="calc-row">
+                        <span>Baten (gegenereerde counters):</span> 
+                        <span class="calc-val" id="disp_gain_ca" style="color:var(--ht-green);">+0.00</span>
+                    </div>
+                    <div style="font-size:0.7em; color:#888; text-align:right;">(Conversie: <span id="disp_conv_perc">0%</span> bij Skill <span id="disp_skill_val">0</span>)</div>
+
+                    <div class="calc-head">NETTO RESULTAAT</div>
+                    <div class="calc-row" style="border-top: 1px solid #ccc; padding-top:5px;">
+                        <span>Verschil (Delta):</span> 
+                        <span class="calc-val" id="disp_delta">0.00</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -277,22 +292,15 @@
     </div>
 
     <div class="input-group">
-        <label>Tactiekvaardigheid</label>
+        <label>Tactiekvaardigheid (Basis)</label>
+        <div style="font-size:0.7em; color:#666; margin-bottom:3px;">Puur op skills (Def + Pass)</div>
         <input type="number" id="tl_basis" value="12" step="0.5" oninput="bereken()">
     </div>
 
     <div class="input-group">
-        <div class="row-3">
-            <div>
-                <label>Snelle midfielders</label>
-                <input type="number" id="q_mid" value="0" min="0" max="5" oninput="bereken()">
-            </div>
-            <div style="flex: 0.1;"></div>
-            <div>
-                <label>Snelle aanvallers</label>
-                <input type="number" id="q_fwd" value="0" min="0" max="3" oninput="bereken()">
-            </div>
-        </div>
+        <label>Snelle spelers (Tactiek Boost)</label>
+        <div style="font-size:0.7em; color:#666; margin-bottom:3px;">Aantal Snelle Wingers + IMs + Forwards</div>
+        <input type="number" id="q_total" value="0" min="0" max="10" oninput="bereken()">
     </div>
 
     <div class="section-title">Jouw aanval versus de verdediging van de tegenstander</div>
@@ -311,7 +319,6 @@
             <input type="number" id="def_opp_c" value="15" placeholder="C" oninput="bereken()">
             <input type="number" id="def_opp_l" value="15" placeholder="L" oninput="bereken()">
         </div>
-        <div style="text-align: center; font-size: 0.7em; color:#888; margin-top:2px;">Let op: Links staat tegenover Rechts!</div>
     </div>
 
     <div class="section-title">Jouw verdediging versus de aanval van de tegenstander</div>
@@ -341,22 +348,19 @@
 
         <div class="result-box delta-box">
             <div class="label-small">Delta xG</div>
-            <div class="val-medium" id="deltaXg">0,00</div>
-            <div class="label-small" style="color: #555; margin-top:5px;">Tactiek: <span id="tlEff">0</span></div>
+            <div class="val-large" id="deltaXg">0,00</div>
+            <div style="font-size: 0.8em; visibility: hidden;">Placeholder</div>
         </div>
     </div>
     <div id="tlWarning" class="warning" style="text-align: center;">⚠️ Tactiekvaardigheid te laag (&lt;10)!</div>
+    <div id="posWarning" class="warning" style="text-align: center;">⚠️ Je wint het middenveld! Counter werkt niet.</div>
 
 </div>
 
 <script>
     function toggleInfo() {
         const panel = document.getElementById('extraInfo');
-        if (panel.style.display === 'block') {
-            panel.style.display = 'none';
-        } else {
-            panel.style.display = 'block';
-        }
+        panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
     }
 
     function calcProb(att, def) {
@@ -370,11 +374,12 @@
     }
 
     function bereken() {
+        // --- INPUTS ---
         let midSelf = parseFloat(document.getElementById('mid_self').value) || 0;
         let midOpp = parseFloat(document.getElementById('mid_opp').value) || 0;
+        
         let tlBasis = parseFloat(document.getElementById('tl_basis').value) || 0;
-        let qMid = parseFloat(document.getElementById('q_mid').value) || 0;
-        let qFwd = parseFloat(document.getElementById('q_fwd').value) || 0;
+        let qTotal = parseFloat(document.getElementById('q_total').value) || 0;
 
         let attSelfL = parseFloat(document.getElementById('att_self_l').value) || 0;
         let attSelfC = parseFloat(document.getElementById('att_self_c').value) || 0;
@@ -392,53 +397,71 @@
         let attOppC = parseFloat(document.getElementById('att_opp_c').value) || 0;
         let attOppL = parseFloat(document.getElementById('att_opp_l').value) || 0;
 
-        // 1. Tactisch Niveau
-        let tlEff = tlBasis + (qMid * 0.5) + (qFwd * 0.2);
-        document.getElementById('tlWarning').style.display = (tlEff < 10) ? 'block' : 'none';
+        // --- BEREKENINGEN ---
 
-        // 2. Scoorkansen
+        // 1. Tactisch Niveau MET 'Quick' Boost (Wiki: up to 2.8)
+        let quickBoost = Math.min(2.8, qTotal * 0.6); 
+        let tlTotal = tlBasis + quickBoost;
+        
+        document.getElementById('tlWarning').style.display = (tlTotal < 10) ? 'block' : 'none';
+
+        // 2. Scoorkansen (Gewogen)
         let pSelfL = calcProb(attSelfL, defOppR);
         let pSelfC = calcProb(attSelfC, defOppC);
         let pSelfR = calcProb(attSelfR, defOppL);
-        let avgScoreSelf = (pSelfL + pSelfC + pSelfR) / 3;
+        let avgAttSelf = (pSelfL + pSelfC + pSelfR) / 3;
+        let wScoreSelf = (0.35 * pSelfC) + (0.25 * pSelfL) + (0.25 * pSelfR) + (0.15 * avgAttSelf);
 
         let pOppL = calcProb(attOppL, defSelfR);
         let pOppC = calcProb(attOppC, defSelfC);
         let pOppR = calcProb(attOppR, defSelfL);
-        let avgScoreOpp = (pOppL + pOppC + pOppR) / 3;
+        let avgAttOpp = (pOppL + pOppC + pOppR) / 3;
+        let wScoreOpp = (0.35 * pOppC) + (0.25 * pOppL) + (0.25 * pOppR) + (0.15 * avgAttOpp);
 
         // 3. Scenario Normaal
         let posShareNorm = midSelf / (midSelf + midOpp);
         if (isNaN(posShareNorm)) posShareNorm = 0.5;
-        
+        let winsMidfield = posShareNorm > 0.50; 
+        document.getElementById('posWarning').style.display = (winsMidfield) ? 'block' : 'none';
+
         let chancesSelfNorm = 10 * posShareNorm;
         let chancesOppNorm = 10 * (1 - posShareNorm);
-        let xGNorm = (chancesSelfNorm * avgScoreSelf) - (chancesOppNorm * avgScoreOpp);
+        
+        // Netto xG Normaal = Wat wij scoren - Wat zij scoren
+        let xGNorm = (chancesSelfNorm * wScoreSelf) - (chancesOppNorm * wScoreOpp);
 
-        // 4. Scenario Counter
+        // 4. Scenario Counter - Basis (met 7% straf)
         let midSelfCa = midSelf * 0.93; // 7% straf
         let posShareCa = midSelfCa / (midSelfCa + midOpp);
         if (isNaN(posShareCa)) posShareCa = 0.5;
 
         let chancesSelfCaBase = 10 * posShareCa;
         let chancesOppCaBase = 10 * (1 - posShareCa);
+        
+        // Wat is de xG schade door de straf?
+        let xGSelfPen = chancesSelfCaBase * wScoreSelf;
+        let xGOppPen = chancesOppCaBase * wScoreOpp;
+        let xGNetPen = xGSelfPen - xGOppPen; 
 
-        // Aantal keren dat de tegenstander mist
-        let stops = chancesOppCaBase * (1 - avgScoreOpp);
-        // Hoeveel daarvan worden counters? (Afhankelijk van tactisch niveau)
-        let extraCa = stops * (tlEff / (tlEff + 10));
+        // 5. De Counter Winst
+        let stops = chancesOppCaBase * (1 - wScoreOpp);
 
-        let xGCa = ((chancesSelfCaBase + extraCa) * avgScoreSelf) - (chancesOppCaBase * avgScoreOpp);
-
-        // 5. Delta & Rating
-        let deltaXg = xGCa - xGNorm;
-        let bonus = 0;
-        if (qFwd > 1) { 
-            bonus = 0.1;
-            deltaXg += bonus; 
+        // Conversie (Logaritmische curve)
+        let conversionRate = 0;
+        if (tlTotal > 5) {
+             conversionRate = 0.48 * (1 - Math.exp(-0.085 * (tlTotal - 5)));
         }
+        if (conversionRate < 0) conversionRate = 0;
+        
+        let extraCa = stops * conversionRate;
+        let xGFromCounters = extraCa * wScoreSelf;
 
-        // --- NIEUWE LOGICA: SCHAAL 0 TOT 20 ---
+        // 6. Totale Delta (Puur tactisch, geen SE bonus)
+        // Delta = (Netto xG met Straf + xG uit Counters) - Netto xG Normaal
+        let xGCaTotal = xGNetPen + xGFromCounters;
+        let deltaXg = xGCaTotal - xGNorm;
+
+        // --- OUTPUT ---
         const labels = [
             "Niet-bestaand", "Rampzalig", "Waardeloos", "Slecht", "Zwak",
             "Matig", "Redelijk", "Goed", "Uitstekend", "Formidabel",
@@ -447,24 +470,17 @@
         ];
 
         let ratingIndex = 0;
-        let adviesLabel = labels[0]; 
-
-        // Als we het middenveld winnen is counteren onlogisch
-        if (posShareNorm > 0.55) {
-            ratingIndex = 0;
+        if (winsMidfield) {
+            ratingIndex = 0; 
         } else if (deltaXg <= 0) {
-            ratingIndex = 0;
+            ratingIndex = 0; 
         } else {
-            // Mapping: deltaXg naar index 0-20
-            // We gebruiken factor 6 + 1. 
-            // Vb: 1.0 delta (sterk) = 7 (Goed). 3.0 delta (enorm) = 19 (Utopisch).
             ratingIndex = Math.floor(deltaXg * 6) + 1;
             if (ratingIndex > 20) ratingIndex = 20;
             if (ratingIndex < 1) ratingIndex = 1;
         }
 
-        adviesLabel = labels[ratingIndex];
-
+        let adviesLabel = labels[ratingIndex];
         let adviesZinHTML = ""; 
 
         if (posShareNorm > 0.55) {
@@ -472,27 +488,25 @@
         } else if (deltaXg <= 0) {
             adviesZinHTML = "Counteren levert <span class='highlight'>geen voordeel</span> op. Je verliest meer kansen dan je wint.";
         } else {
-            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()}</span>. Counteren levert je een voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
+            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()}</span>. Counteren levert je een tactisch voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
         }
 
         document.getElementById('ratingVal').innerText = ratingIndex + "/20";
         document.getElementById('ratingLabel').innerText = adviesLabel;
         document.getElementById('deltaXg').innerText = (deltaXg > 0 ? "+" : "") + deltaXg.toFixed(2);
-        document.getElementById('tlEff').innerText = tlEff.toFixed(1);
         document.getElementById('adviesText').innerHTML = adviesZinHTML;
 
-        // 6. Vul de info-box met data
-        document.getElementById('disp_pos_norm').innerText = Math.round(posShareNorm * 100) + "%";
-        document.getElementById('disp_ch_self_norm').innerText = chancesSelfNorm.toFixed(1);
-        document.getElementById('disp_ch_opp_norm').innerText = chancesOppNorm.toFixed(1);
+        // INFO BOX UPDATE (KOSTEN VS BATEN)
         document.getElementById('disp_xg_norm').innerText = xGNorm.toFixed(2);
-
-        document.getElementById('disp_mid_pen').innerText = Math.round(midSelfCa) + " (" + Math.round(posShareCa*100) + "%)";
-        document.getElementById('disp_ch_self_ca').innerText = chancesSelfCaBase.toFixed(1);
-        document.getElementById('disp_ch_opp_ca').innerText = chancesOppCaBase.toFixed(1);
-        document.getElementById('disp_stops').innerText = stops.toFixed(2);
-        document.getElementById('disp_extra_ca').innerText = extraCa.toFixed(2);
-        document.getElementById('disp_xg_ca').innerText = xGCa.toFixed(2);
+        
+        // Kosten: Het verschil tussen xG met straf en xG normaal
+        let costPenalty = xGNetPen - xGNorm;
+        document.getElementById('disp_cost_pen').innerText = costPenalty.toFixed(2);
+        
+        // Baten: Wat de counters opleveren
+        document.getElementById('disp_gain_ca').innerText = "+" + xGFromCounters.toFixed(2);
+        document.getElementById('disp_conv_perc').innerText = Math.round(conversionRate * 100) + "%";
+        document.getElementById('disp_skill_val').innerText = tlTotal.toFixed(1);
 
         document.getElementById('disp_delta').innerText = deltaXg.toFixed(2);
     }
