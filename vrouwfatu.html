@@ -153,29 +153,34 @@
         }
 
         .prediction-row:last-child { border-bottom: none; }
-        .pred-date { color: #666; }
+        .pred-date { color: #666; font-size: 0.9em; }
         .pred-side { font-weight: bold; color: var(--ht-text); }
         .left-side { color: #d68b00; } /* Beetje oranje/geel tint */
         .right-side { color: var(--ht-green); }
 
-        /* Footer styling gelijk aan anderen */
-        .footer-advice {
-            margin-top: 30px;
-            border-top: 2px dotted #ccc;
-            padding-top: 20px;
+        /* CHARACTER DISPLAY STYLE (Aangepast voor bovenin) */
+        .character-display {
+            margin-top: 0;
+            margin-bottom: 25px; /* Ruimte onder de box */
+            padding-top: 0;
+            border-top: none; /* Geen lijn meer boven */
             display: flex;
-            align-items: center;
+            align-items: flex-start;
         }
 
         .footer-photo {
             width: 80px;
             height: auto;
             margin-right: 15px;
-            border-radius: 5px;
+        }
+
+        .quote-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .quote-box {
-            flex: 1;
             font-style: italic;
             color: #555;
             background: #f9f9f9;
@@ -183,6 +188,7 @@
             border-radius: 8px;
             border-left: 4px solid var(--ht-yellow);
             font-size: 0.9em;
+            position: relative;
         }
 
         .name-tag {
@@ -211,6 +217,16 @@
         <h1>Vrouw Fatu</h1>
     </div>
 
+    <div class="character-display">
+        <img src="vrouwfatu.jpg" alt="Vrouw Fatu" class="footer-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <span class="name-tag">Vrouw Fatu:</span>
+                "Luister goed, mi boi. De kaarten liegen niet, maar jij moet wel zelf scoren."
+            </div>
+        </div>
+    </div>
+
     <div class="input-group">
         <label>Stel je vraag aan de geesten...</label>
         <input type="text" id="userQuestion" placeholder="Bijv: Moet ik op de counter spelen?">
@@ -225,14 +241,6 @@
         <div class="section-title">Aanvalsadvies komende 10 dagen</div>
         <div id="predictionList">
             </div>
-    </div>
-
-    <div class="footer-advice">
-        <img src="vrouwfatu.jpg" alt="Vrouw Fatu" class="footer-photo">
-        <div class="quote-box">
-            <span class="name-tag">Vrouw Fatu:</span>
-            "Luister goed, mi boi. De kaarten liegen niet, maar jij moet wel zelf scoren."
-        </div>
     </div>
 
 </div>
@@ -310,7 +318,8 @@
     function generatePredictions() {
         const listContainer = document.getElementById('predictionList');
         const today = new Date();
-        const options = { weekday: 'short', day: 'numeric', month: 'short' };
+        // AANGEPAST: Volledig uitgeschreven datumformaat
+        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
 
         for (let i = 0; i < 10; i++) {
             // Maak nieuwe datum (vandaag + i dagen)
@@ -318,12 +327,9 @@
             currentDate.setDate(today.getDate() + i);
 
             // Genereer een unieke code voor deze dag (YYYYMMDD)
-            // Dit zorgt ervoor dat het advies altijd hetzelfde blijft voor die datum
             let dateCode = currentDate.getFullYear() * 10000 + (currentDate.getMonth() + 1) * 100 + currentDate.getDate();
 
             // Simpele 'random' berekening op basis van de datumcode
-            // Math.sin(dateCode) geeft een getal tussen -1 en 1.
-            // Is het positief? Dan rechts. Negatief? Dan links.
             let seed = Math.sin(dateCode); 
             let advies = "";
             let classColor = "";

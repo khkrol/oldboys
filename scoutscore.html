@@ -36,11 +36,12 @@
             border-top: 4px solid var(--ht-green);
             padding: 25px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
         }
 
         .header { 
             text-align: center; 
-            margin-bottom: 25px; 
+            margin-bottom: 20px; 
             border-bottom: 2px solid #eee;
             padding-bottom: 15px;
             display: flex;
@@ -66,6 +67,50 @@
             text-transform: uppercase; 
             font-weight: bold;
         }
+
+        /* CHARACTER DISPLAY STYLE (Bovenaan) */
+        .character-display {
+            margin-top: 0;
+            margin-bottom: 25px;
+            padding-top: 0;
+            border-top: none;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .footer-photo {
+            width: 80px;
+            height: auto;
+            margin-right: 15px;
+        }
+
+        .quote-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quote-box {
+            font-style: italic;
+            color: #555;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ht-yellow);
+            font-size: 0.9em;
+            position: relative;
+        }
+
+        .name-tag {
+            font-weight: bold;
+            color: var(--ht-green);
+            font-style: normal;
+            display: inline-block;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        #emileQuoteWord { font-weight: bold; color: var(--ht-green); }
 
         .input-group { margin-bottom: 15px; }
         label { 
@@ -107,40 +152,74 @@
         .val-large { font-size: 2em; font-weight: bold; margin: 5px 0; }
         .val-medium { font-size: 1.1em; font-weight: bold; margin: 5px 0;}
 
-        .emile-footer {
-            margin-top: 30px;
-            border-top: 2px dotted #ccc;
-            padding-top: 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Schaduw is hier nu verwijderd */
-        .emile-photo {
-            width: 80px;
-            height: auto;
-            margin-right: 15px;
-        }
-
-        .emile-quote-box {
-            flex: 1;
-            font-style: italic;
-            color: #555;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 8px;
-            border-left: 4px solid var(--ht-yellow);
-        }
-
-        .emile-name {
+        /* Styles voor Info Button en Modal */
+        .info-btn {
+            background-color: var(--ht-green);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
             font-weight: bold;
-            color: var(--ht-green);
+            cursor: pointer;
+            margin-left: 5px;
             font-style: normal;
-            display: block;
-            margin-bottom: 5px;
+            vertical-align: middle;
+            border: none;
         }
 
-        #emileQuoteWord { font-weight: bold; color: var(--ht-green); }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        .modal-header {
+            color: var(--ht-green);
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .close-btn {
+            background: var(--ht-green);
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        ul { padding-left: 20px; margin: 10px 0; }
+        li { margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -152,6 +231,19 @@
             <img src="potters.jpg" alt="Potter's Old Boys Logo" class="pob-logo">
         </div>
         <h1>Scoutscore Calculator</h1>
+    </div>
+
+    <div class="character-display">
+        <img src="emile.jpg" alt="Emile 'De Neus' Muntz" class="footer-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <div>
+                    <span class="name-tag">Emile 'De Neus' Muntz:</span>
+                    <button class="info-btn" onclick="openModal()">i</button>
+                </div>
+                "Dit is volgens mij een <span id="emileQuoteWord">...</span> talent!"
+            </div>
+        </div>
     </div>
 
     <div class="input-group">
@@ -221,14 +313,21 @@
         </div>
     </div>
 
-    <div class="emile-footer">
-        <img src="emile.jpg" alt="Emile 'De Neus' Muntz" class="emile-photo">
-        <div class="emile-quote-box">
-            <span class="emile-name">Emile 'De Neus' Muntz:</span>
-            "Dit is volgens mij een <span id="emileQuoteWord">...</span> talent!"
-        </div>
-    </div>
+</div>
 
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Scoutscore Formule</div>
+        <p>De score wordt berekend op basis van gewogen factoren:</p>
+        <ul>
+            <li><strong>Leeftijd:</strong> 15 jaar (+2 pnt), 16 jaar (0 pnt).</li>
+            <li><strong>Huidig & Potentieel:</strong> Niveau t.o.v. 'Uitstekend' (8). Telt dubbel mee.</li>
+            <li><strong>Gemiddeld:</strong> Niveau t.o.v. 'Uitstekend' (8). Telt driedubbel mee.</li>
+            <li><strong>Specialiteit:</strong> +1 punt.</li>
+        </ul>
+        <p style="font-size: 0.8em; color: #555;">De derde skill wordt geschat door: <em>(Gemiddeld * 3) - Huidig - Potentieel</em>.</p>
+        <button class="close-btn" onclick="closeModal()">Sluiten</button>
+    </div>
 </div>
 
 <script>
@@ -259,6 +358,9 @@
         quoteIndex = Math.max(0, Math.min(21, quoteIndex));
         document.getElementById('emileQuoteWord').innerText = niveaus[quoteIndex].toLowerCase();
     }
+
+    function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
 
     window.onload = bereken;
 </script>

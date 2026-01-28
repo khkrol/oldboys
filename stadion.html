@@ -41,7 +41,7 @@
 
         .header { 
             text-align: center; 
-            margin-bottom: 25px; 
+            margin-bottom: 20px; 
             border-bottom: 2px solid #eee;
             padding-bottom: 15px;
             display: flex;
@@ -61,6 +61,66 @@
         .pob-logo { width: 70px; height: auto; }
 
         h1 { color: var(--ht-green); font-size: 1.3em; margin: 0; text-transform: uppercase; font-weight: bold; }
+
+        /* CHARACTER DISPLAY STYLE (Bovenaan) */
+        .character-display {
+            margin-top: 0;
+            margin-bottom: 25px;
+            padding-top: 0;
+            border-top: none;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .footer-photo {
+            width: 80px;
+            height: auto;
+            margin-right: 15px;
+        }
+
+        .quote-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quote-box {
+            font-style: italic;
+            color: #555;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ht-yellow);
+            font-size: 0.9em;
+            position: relative;
+        }
+
+        .name-tag {
+            font-weight: bold;
+            color: var(--ht-green);
+            font-style: normal;
+            display: inline-block;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .info-btn {
+            background-color: var(--ht-green);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 5px;
+            font-style: normal;
+            vertical-align: middle;
+            border: none;
+        }
 
         .input-group { margin-bottom: 15px; }
         label { display: block; font-size: 0.9em; margin-bottom: 5px; color: var(--ht-green); font-weight: bold; }
@@ -97,47 +157,6 @@
 
         .sector-table th { background-color: var(--ht-green); color: white; text-align: left; padding: 10px; }
         .sector-table td { padding: 10px; border-bottom: 1px solid #eee; }
-
-        /* Donnie footer & Infoknop */
-        .donnie-footer {
-            margin-top: 30px;
-            border-top: 2px dotted #ccc;
-            padding-top: 20px;
-            display: flex;
-            align-items: center;
-            position: relative;
-        }
-
-        .donnie-photo { width: 80px; height: auto; margin-right: 15px; }
-
-        .donnie-quote-box {
-            flex: 1;
-            font-style: italic;
-            color: #555;
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 8px;
-            border-left: 4px solid var(--ht-yellow);
-            position: relative;
-        }
-
-        .donnie-name { font-weight: bold; color: var(--ht-green); display: block; margin-bottom: 5px; font-style: normal; }
-
-        .info-btn {
-            position: absolute;
-            right: 5px;
-            top: 5px;
-            background: var(--ht-green);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            font-family: serif;
-        }
 
         /* Modal (Uitleg venster) */
         .modal {
@@ -199,6 +218,19 @@
         <h1>Stadion Calculator</h1>
     </div>
 
+    <div class="character-display">
+        <img src="donnie.jpg" alt="Donnie" class="footer-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <div>
+                    <span class="name-tag">Donnie van Baarschot:</span>
+                    <button class="info-btn" onclick="openModal()">i</button>
+                </div>
+                "Dit stadion is precies groot genoeg voor een flinke polonaise!"
+            </div>
+        </div>
+    </div>
+
     <div class="input-group">
         <label>Grootte fanclub</label>
         <input type="number" id="fans" value="1500" oninput="berekenStadion()">
@@ -237,15 +269,6 @@
             <tr><td>VIP-boxen (incl. Martin en Klaas)</td><td id="resVip">688</td></tr>
         </tbody>
     </table>
-
-    <div class="donnie-footer">
-        <img src="donnie.jpg" alt="Donnie" class="donnie-photo">
-        <div class="donnie-quote-box">
-            <button class="info-btn" onclick="openModal()">i</button>
-            <span class="donnie-name">Donnie van Baarschot:</span>
-            "Dit stadion is precies groot genoeg voor een flinke polonaise!"
-        </div>
-    </div>
 </div>
 
 <div id="infoModal" class="modal">

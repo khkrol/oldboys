@@ -129,10 +129,12 @@
         .val-large { font-size: 2em; font-weight: bold; margin: 5px 0; }
         .val-medium { font-size: 1.1em; font-weight: bold; margin: 5px 0; }
 
-        .footer-advice {
-            margin-top: 30px;
-            border-top: 2px dotted #ccc;
-            padding-top: 20px;
+        /* CHARACTER DISPLAY STYLE (Bovenaan) */
+        .character-display {
+            margin-top: 0;
+            margin-bottom: 25px;
+            padding-top: 0;
+            border-top: none;
             display: flex;
             align-items: flex-start;
         }
@@ -229,6 +231,36 @@
         <h1>Counterhulp</h1>
     </div>
 
+    <div class="character-display">
+        <img src="armadillo.jpg" alt="Atanasio 'Armadillo' Ardila" class="footer-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <div>
+                    <span class="name-tag">Atanasio 'Armadillo' Ardila:</span>
+                    <span class="info-btn" onclick="toggleInfo()" title="Toon berekening">i</span>
+                </div>
+                <span id="adviesText">...</span>
+                
+                <div id="extraInfo" class="explanation-panel">
+                    <div class="calc-head">SCENARIO NORMAAL</div>
+                    <div class="calc-row"><span>Balbezit:</span> <span class="calc-val" id="disp_pos_norm">50%</span></div>
+                    <div class="calc-row"><span>Kansen (Wij/Zij):</span> <span class="calc-val"><span id="disp_ch_self_norm">5.0</span> / <span id="disp_ch_opp_norm">5.0</span></span></div>
+                    <div class="calc-row"><span style="font-weight:bold;">xG Normaal:</span> <span class="calc-val" id="disp_xg_norm">0.00</span></div>
+
+                    <div class="calc-head">SCENARIO COUNTER</div>
+                    <div class="calc-row"><span>Middenveld (7% straf):</span> <span class="calc-val" id="disp_mid_pen">93%</span></div>
+                    <div class="calc-row"><span>Nieuwe kansen (Wij/Zij):</span> <span class="calc-val"><span id="disp_ch_self_ca">4.8</span> / <span id="disp_ch_opp_ca">5.2</span></span></div>
+                    <div class="calc-row"><span>Gemiste kansen tegenstander:</span> <span class="calc-val" id="disp_stops">0.0</span></div>
+                    <div class="calc-row"><span>Gewonnen counters:</span> <span class="calc-val" id="disp_extra_ca">0.0</span></div>
+                    <div class="calc-row"><span style="font-weight:bold;">xG Counter:</span> <span class="calc-val" id="disp_xg_ca">0.00</span></div>
+
+                    <div class="calc-head">RESULTAAT</div>
+                    <div class="calc-row"><span>Verschil (Delta):</span> <span class="calc-val" id="disp_delta">0.00</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="input-group">
         <div class="row-3">
             <div>
@@ -312,36 +344,6 @@
         </div>
     </div>
     <div id="tlWarning" class="warning" style="text-align: center;">⚠️ Tactiekvaardigheid te laag (&lt;10)!</div>
-
-    <div class="footer-advice">
-        <img src="armadillo.jpg" alt="Atanasio 'Armadillo' Ardila" class="footer-photo">
-        <div class="quote-wrapper">
-            <div class="quote-box">
-                <div>
-                    <span class="name-tag">Atanasio 'Armadillo' Ardila:</span>
-                    <span class="info-btn" onclick="toggleInfo()" title="Toon berekening">i</span>
-                </div>
-                <span id="adviesText">...</span>
-                
-                <div id="extraInfo" class="explanation-panel">
-                    <div class="calc-head">SCENARIO NORMAAL</div>
-                    <div class="calc-row"><span>Balbezit:</span> <span class="calc-val" id="disp_pos_norm">50%</span></div>
-                    <div class="calc-row"><span>Kansen (Wij/Zij):</span> <span class="calc-val"><span id="disp_ch_self_norm">5.0</span> / <span id="disp_ch_opp_norm">5.0</span></span></div>
-                    <div class="calc-row"><span style="font-weight:bold;">xG Normaal:</span> <span class="calc-val" id="disp_xg_norm">0.00</span></div>
-
-                    <div class="calc-head">SCENARIO COUNTER</div>
-                    <div class="calc-row"><span>Middenveld (7% straf):</span> <span class="calc-val" id="disp_mid_pen">93%</span></div>
-                    <div class="calc-row"><span>Nieuwe kansen (Wij/Zij):</span> <span class="calc-val"><span id="disp_ch_self_ca">4.8</span> / <span id="disp_ch_opp_ca">5.2</span></span></div>
-                    <div class="calc-row"><span>Gemiste kansen tegenstander:</span> <span class="calc-val" id="disp_stops">0.0</span></div>
-                    <div class="calc-row"><span>Gewonnen counters:</span> <span class="calc-val" id="disp_extra_ca">0.0</span></div>
-                    <div class="calc-row"><span style="font-weight:bold;">xG Counter:</span> <span class="calc-val" id="disp_xg_ca">0.00</span></div>
-
-                    <div class="calc-head">RESULTAAT</div>
-                    <div class="calc-row"><span>Verschil (Delta):</span> <span class="calc-val" id="disp_delta">0.00</span></div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 </div>
 
@@ -468,7 +470,7 @@
         } else if (deltaXg <= 0) {
             adviesZinHTML = "Counteren levert <span class='highlight'>geen voordeel</span> op. Je verliest meer kansen dan je wint.";
         } else {
-            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()} (${ratingIndex})</span>. Counteren levert je een voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
+            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()}</span>. Counteren levert je een voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
         }
 
         document.getElementById('ratingVal').innerText = ratingIndex + "/20";
