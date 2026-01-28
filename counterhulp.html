@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potter's Counterhulp v2.4</title>
+    <title>Potter's Counterhulp v2.5</title>
     
     <link rel="apple-touch-icon" href="potters.jpg">
     <link rel="icon" href="potters.jpg">
@@ -252,27 +252,22 @@
                 
                 <div id="extraInfo" class="explanation-panel">
 
-                    <div class="calc-head">BASIS (NORMAAL)</div>
-                    <div class="calc-row"><span>xG Normaal:</span> <span class="calc-val" id="disp_xg_norm">0.00</span></div>
+                    <div class="calc-head">SCENARIO NORMAAL</div>
+                    <div class="calc-row"><span>xG Potter's:</span> <span class="calc-val" id="disp_xg_self_norm">0.00</span></div>
+                    <div class="calc-row"><span>xG tegenstander:</span> <span class="calc-val" id="disp_xg_opp_norm">0.00</span></div>
+                    <div class="calc-row" style="border-top:1px dotted #ccc;"><span>Netto:</span> <span class="calc-val" id="disp_xg_norm">0.00</span></div>
 
-                    <div class="calc-head">EFFECT CA TACTIEK</div>
-                    <div class="calc-row">
-                        <span>Kosten (Middenveld straf):</span> 
-                        <span class="calc-val" id="disp_cost_pen" style="color:#d9534f;">-0.00</span>
-                    </div>
-                    <div style="font-size:0.7em; color:#888; margin-bottom:4px; text-align:right;">(minder eigen kansen + meer kansen tegen)</div>
+                    <div class="calc-head">SCENARIO COUNTER (BASIS)</div>
+                    <div class="calc-row"><span>xG Potter's (na straf):</span> <span class="calc-val" id="disp_xg_self_pen">0.00</span></div>
+                    <div class="calc-row"><span>xG tegenstander (na straf):</span> <span class="calc-val" id="disp_xg_opp_pen">0.00</span></div>
+                    <div class="calc-row" style="border-top:1px dotted #ccc;"><span>Netto (Straf):</span> <span class="calc-val" id="disp_xg_net_pen" style="color:#d9534f;">0.00</span></div>
 
-                    <div class="calc-row">
-                        <span>Baten (gegenereerde counters):</span> 
-                        <span class="calc-val" id="disp_gain_ca" style="color:var(--ht-green);">+0.00</span>
-                    </div>
-                    <div style="font-size:0.7em; color:#888; text-align:right;">(Conversie: <span id="disp_conv_perc">0%</span> bij Skill <span id="disp_skill_val">0</span>)</div>
+                    <div class="calc-head">EXTRA COUNTERS</div>
+                    <div class="calc-row"><span>Gewonnen xG:</span> <span class="calc-val" id="disp_gain_ca" style="color:var(--ht-green);">+0.00</span></div>
+                    <div style="font-size:0.7em; color:#888; text-align:right;">(Conversie: <span id="disp_conv_perc">0%</span>)</div>
 
-                    <div class="calc-head">NETTO RESULTAAT</div>
-                    <div class="calc-row" style="border-top: 1px solid #ccc; padding-top:5px;">
-                        <span>Verschil (Delta):</span> 
-                        <span class="calc-val" id="disp_delta">0.00</span>
-                    </div>
+                    <div class="calc-head">EINDRESULTAAT</div>
+                    <div class="calc-row"><span>Verschil (Delta):</span> <span class="calc-val" id="disp_delta">0.00</span></div>
                 </div>
             </div>
         </div>
@@ -292,14 +287,14 @@
     </div>
 
     <div class="input-group">
-        <label>Tactiekvaardigheid (Basis)</label>
-        <div style="font-size:0.7em; color:#666; margin-bottom:3px;">Puur op skills (Def + Pass)</div>
+        <label>Tactiekvaardigheid (basis)</label>
+        <div style="font-size:0.7em; color:#666; margin-bottom:3px;">Op basis van het verdedigen en passen van alle verdedigers.</div>
         <input type="number" id="tl_basis" value="12" step="0.5" oninput="bereken()">
     </div>
 
     <div class="input-group">
-        <label>Snelle spelers (Tactiek Boost)</label>
-        <div style="font-size:0.7em; color:#666; margin-bottom:3px;">Aantal Snelle Wingers + IMs + Forwards</div>
+        <label>Snelle spelers (boost)</label>
+        <div style="font-size:0.7em; color:#666; margin-bottom:3px;">Aantal snelle middenvelders, vleugelspelers en aanvallers.</div>
         <input type="number" id="q_total" value="0" min="0" max="10" oninput="bereken()">
     </div>
 
@@ -427,8 +422,10 @@
         let chancesSelfNorm = 10 * posShareNorm;
         let chancesOppNorm = 10 * (1 - posShareNorm);
         
-        // Netto xG Normaal = Wat wij scoren - Wat zij scoren
-        let xGNorm = (chancesSelfNorm * wScoreSelf) - (chancesOppNorm * wScoreOpp);
+        // Specifieke xG (Wij vs Zij)
+        let xGSelfNorm = chancesSelfNorm * wScoreSelf;
+        let xGOppNorm = chancesOppNorm * wScoreOpp;
+        let xGNorm = xGSelfNorm - xGOppNorm;
 
         // 4. Scenario Counter - Basis (met 7% straf)
         let midSelfCa = midSelf * 0.93; // 7% straf
@@ -438,7 +435,7 @@
         let chancesSelfCaBase = 10 * posShareCa;
         let chancesOppCaBase = 10 * (1 - posShareCa);
         
-        // Wat is de xG schade door de straf?
+        // Specifieke xG bij straf (Wij vs Zij)
         let xGSelfPen = chancesSelfCaBase * wScoreSelf;
         let xGOppPen = chancesOppCaBase * wScoreOpp;
         let xGNetPen = xGSelfPen - xGOppPen; 
@@ -496,17 +493,17 @@
         document.getElementById('deltaXg').innerText = (deltaXg > 0 ? "+" : "") + deltaXg.toFixed(2);
         document.getElementById('adviesText').innerHTML = adviesZinHTML;
 
-        // INFO BOX UPDATE (KOSTEN VS BATEN)
+        // INFO BOX UPDATE (UITGEBREID)
+        document.getElementById('disp_xg_self_norm').innerText = xGSelfNorm.toFixed(2);
+        document.getElementById('disp_xg_opp_norm').innerText = xGOppNorm.toFixed(2);
         document.getElementById('disp_xg_norm').innerText = xGNorm.toFixed(2);
         
-        // Kosten: Het verschil tussen xG met straf en xG normaal
-        let costPenalty = xGNetPen - xGNorm;
-        document.getElementById('disp_cost_pen').innerText = costPenalty.toFixed(2);
+        document.getElementById('disp_xg_self_pen').innerText = xGSelfPen.toFixed(2);
+        document.getElementById('disp_xg_opp_pen').innerText = xGOppPen.toFixed(2);
+        document.getElementById('disp_xg_net_pen').innerText = xGNetPen.toFixed(2);
         
-        // Baten: Wat de counters opleveren
         document.getElementById('disp_gain_ca').innerText = "+" + xGFromCounters.toFixed(2);
         document.getElementById('disp_conv_perc').innerText = Math.round(conversionRate * 100) + "%";
-        document.getElementById('disp_skill_val').innerText = tlTotal.toFixed(1);
 
         document.getElementById('disp_delta').innerText = deltaXg.toFixed(2);
     }
