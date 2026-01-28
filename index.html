@@ -46,11 +46,13 @@
             color: var(--white);
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.85em;
+            font-size: 0.85em; /* Iets kleiner zodat het past op mobiel */
             text-transform: uppercase;
             border-bottom: 4px solid transparent;
             transition: 0.3s;
             cursor: pointer;
+            text-align: center;
+            padding: 0 5px;
         }
 
         .nav-item.active {
@@ -76,10 +78,15 @@
 
     <nav>
         <div class="nav-item active" id="btnScout" onclick="loadPage('scoutscore.html', 'btnScout')">
-            Scoutscore
+            Scout
         </div>
+        
         <div class="nav-item" id="btnStadion" onclick="loadPage('stadion.html', 'btnStadion')">
             Stadion
+        </div>
+
+        <div class="nav-item" id="btnCounter" onclick="loadPage('counterhulp.html', 'btnCounter')">
+            Counter
         </div>
     </nav>
 
@@ -108,5 +115,4 @@
     </script>
 
 </body>
-
 </html>
