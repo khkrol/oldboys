@@ -36,13 +36,17 @@
             border-top: 4px solid var(--ht-green);
             padding: 25px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
         }
 
+        /* Header exact overgenomen van counterhulp */
         .header { 
+            text-align: center; 
             margin-bottom: 20px; 
             border-bottom: 2px solid #eee;
             padding-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .logo-container {
@@ -53,18 +57,19 @@
             margin-bottom: 15px;
         }
 
-        .ht-logo { width: 140px; height: auto; }
-        .pob-logo { width: 65px; height: auto; }
+        .ht-logo { width: 150px; height: auto; }
+        .pob-logo { width: 70px; height: auto; }
 
         h1 { 
             color: var(--ht-green); 
-            font-size: 1.4em; 
+            font-size: 1.3em; 
             margin: 0; 
             text-transform: uppercase; 
             font-weight: bold;
         }
 
         .intro-text {
+            text-align: center;
             font-style: italic;
             color: #555;
             margin-bottom: 25px;
@@ -75,7 +80,7 @@
         .board-members {
             display: flex;
             justify-content: center;
-            align-items: flex-end; /* Zorgt dat namen op gelijke hoogte beginnen als foto's verschillen */
+            align-items: flex-end;
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -85,14 +90,14 @@
             padding: 5px;
             background: transparent;
             border: none;
+            text-align: center;
         }
 
         .member-photo {
-            width: 120px;       /* Vaste breedte */
-            height: auto;       /* Hoogte past zich aan aan de foto (geen vervorming) */
+            width: 120px;
+            height: auto;
             display: block;
             margin: 0 auto 10px auto;
-            /* Geen object-fit meer nodig, want we dwingen geen vierkant af */
         }
 
         .member-name {
@@ -115,6 +120,8 @@
             color: white;
             padding: 15px;
             border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .cta-title {
@@ -127,6 +134,15 @@
         .cta-desc {
             font-size: 0.85em;
             opacity: 0.9;
+        }
+
+        /* Styling voor de Jack Daniels foto */
+        .bottle-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            display: block;
+            margin: 20px auto 0 auto;
         }
 
     </style>
@@ -143,7 +159,7 @@
     </div>
 
     <div class="intro-text">
-        "Welkom in het hart van de club. Pak een sigaar en een Jack Daniels Old No. 7."
+        "Welkom in het hart van de club. Pak een sigaar en een glas Jack Daniels Old No. 7."
     </div>
 
     <div class="board-members">
@@ -163,9 +179,11 @@
     <div class="cta-section">
         <div class="cta-title">Aan de slag</div>
         <div class="cta-desc">
-            Gebruik het menu hierboven om in gesprek te gaan met de <strong>scout</strong>, de <strong>stadionmanager</strong>, de <strong>counterhulp</strong> of de <strong>waarzegster</strong>.
+            Gebruik het menu hierboven om in gesprek te gaan met de <strong>scout</strong>, de <strong>stadionmanager</strong>, de <strong>counterspecialist</strong> en de <strong>waarzegster</strong>.
         </div>
     </div>
+
+    <img src="jack.jpg" alt="Jack Daniels" class="bottle-image">
 
 </div>
 
