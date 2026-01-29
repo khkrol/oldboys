@@ -11,7 +11,8 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3D7C3B">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes"> <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-capable" content="yes"> 
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
         :root {
@@ -49,7 +50,7 @@
             color: var(--white);
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.80em;
+            font-size: 0.75em; /* Iets kleiner om 5 knoppen te passen */
             text-transform: uppercase;
             border-bottom: 4px solid transparent;
             transition: 0.3s;
@@ -81,7 +82,11 @@
 <body>
 
     <nav>
-        <div class="nav-item active" id="btnScout" onclick="loadPage('scoutscore.html', 'btnScout')">
+        <div class="nav-item active" id="btnBestuur" onclick="loadPage('welkom.html', 'btnBestuur')">
+            Bestuur
+        </div>
+
+        <div class="nav-item" id="btnScout" onclick="loadPage('scoutscore.html', 'btnScout')">
             Scout
         </div>
         
@@ -99,7 +104,7 @@
     </nav>
 
     <div class="content-wrapper">
-        <iframe src="scoutscore.html" id="mainFrame" name="mainFrame"></iframe>
+        <iframe src="welkom.html" id="mainFrame" name="mainFrame"></iframe>
     </div>
 
     <script>
