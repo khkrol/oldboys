@@ -28,20 +28,37 @@
             height: 100%;
             width: 100%;
             font-family: Verdana, sans-serif;
-            overflow: hidden; /* Voorkomt dubbele scrollbalken */
+            overflow: hidden;
             background-color: var(--ht-green);
         }
 
-        /* Navigatiebalk bovenin */
+        /* Navigatie Container */
         nav {
             display: flex;
-            background-color: var(--ht-green);
-            height: 60px;
+            flex-direction: column; /* Onder elkaar */
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
             z-index: 1000;
             position: relative;
         }
 
+        /* Algemene stijl voor een rij */
+        .nav-row {
+            display: flex;
+            width: 100%;
+            height: 40px; /* Slankere balken */
+        }
+
+        /* Specifieke stijlen voor boven en onder */
+        .nav-row.top {
+            background-color: var(--ht-dark);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav-row.bottom {
+            background-color: var(--ht-green);
+        }
+
+        /* Knoppen */
         .nav-item {
             flex: 1;
             display: flex;
@@ -50,24 +67,40 @@
             color: var(--white);
             text-decoration: none;
             font-weight: bold;
-            font-size: 0.75em; /* Iets kleiner om 5 knoppen te passen */
+            font-size: 0.7em; /* Iets kleiner voor compacte look */
             text-transform: uppercase;
-            border-bottom: 4px solid transparent;
-            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            transition: 0.2s;
             cursor: pointer;
             text-align: center;
-            padding: 0 2px;
-            line-height: 1.1;
+            padding: 0 5px;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
-        .nav-item.active {
-            border-bottom: 4px solid var(--ht-yellow);
-            background-color: var(--ht-dark);
+        /* Stijl voor de actieve knop (alleen in de onderste balk relevant voor de lijn) */
+        .nav-row.bottom .nav-item.active {
+            border-bottom: 3px solid var(--ht-yellow);
+            background-color: rgba(0,0,0,0.1);
         }
 
-        /* De container voor de inhoud (het frame) */
+        /* De 'Hoofd' knop bovenin */
+        .nav-item.main-title {
+            font-size: 0.85em; /* Iets groter */
+            letter-spacing: 1px;
+            color: var(--ht-yellow); /* Gele tekst voor de hoofdtitel */
+        }
+        
+        /* Als de 'Home' actief is, geven we hem een subtiele achtergrond highlight */
+        .nav-item.main-title.active {
+            background-color: rgba(255, 194, 0, 0.1); /* Zeer lichte gele gloed */
+            border-bottom: 3px solid var(--ht-yellow);
+        }
+
+        /* De container voor de inhoud */
         .content-wrapper {
-            height: calc(100% - 60px); /* Schermhoogte minus de nav-balk */
+            /* Totale hoogte minus de 2 balken van 40px = 80px */
+            height: calc(100% - 80px); 
             width: 100%;
         }
 
@@ -82,24 +115,28 @@
 <body>
 
     <nav>
-        <div class="nav-item active" id="btnBestuur" onclick="loadPage('welkom.html', 'btnBestuur')">
-            Bestuur
+        <div class="nav-row top">
+            <div class="nav-item main-title active" id="btnBestuur" onclick="loadPage('welkom.html', 'btnBestuur')">
+                Potter's Football Group
+            </div>
         </div>
 
-        <div class="nav-item" id="btnScout" onclick="loadPage('scoutscore.html', 'btnScout')">
-            Scout
-        </div>
-        
-        <div class="nav-item" id="btnStadion" onclick="loadPage('stadion.html', 'btnStadion')">
-            Stadion
-        </div>
+        <div class="nav-row bottom">
+            <div class="nav-item" id="btnScout" onclick="loadPage('scoutscore.html', 'btnScout')">
+                Scout
+            </div>
+            
+            <div class="nav-item" id="btnStadion" onclick="loadPage('stadion.html', 'btnStadion')">
+                Stadion
+            </div>
 
-        <div class="nav-item" id="btnCounter" onclick="loadPage('counterhulp.html', 'btnCounter')">
-            Counter
-        </div>
+            <div class="nav-item" id="btnCounter" onclick="loadPage('counterhulp.html', 'btnCounter')">
+                Counter
+            </div>
 
-        <div class="nav-item" id="btnFatu" onclick="loadPage('vrouwfatu.html', 'btnFatu')">
-            Fatu
+            <div class="nav-item" id="btnFatu" onclick="loadPage('vrouwfatu.html', 'btnFatu')">
+                Fatu
+            </div>
         </div>
     </nav>
 
@@ -112,9 +149,12 @@
             // Verander de bron van het iframe
             document.getElementById('mainFrame').src = url;
 
-            // Update de actieve knop (kleur/lijntje)
+            // Update de actieve knop
+            // Eerst alles resetten
             const items = document.querySelectorAll('.nav-item');
             items.forEach(item => item.classList.remove('active'));
+
+            // De aangeklikte knop actief maken
             document.getElementById(btnId).classList.add('active');
         }
 
