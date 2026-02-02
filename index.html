@@ -56,6 +56,8 @@
 
         .nav-row.bottom {
             background-color: var(--ht-green);
+            /* Lijn tussen de twee tool-rijen voor duidelijkheid */
+            border-bottom: 1px solid rgba(0,0,0,0.05); 
         }
 
         /* Knoppen */
@@ -99,8 +101,8 @@
 
         /* De container voor de inhoud */
         .content-wrapper {
-            /* Totale hoogte minus de 2 balken van 40px = 80px */
-            height: calc(100% - 80px); 
+            /* Totale hoogte minus de 3 balken van 40px = 120px */
+            height: calc(100% - 120px); 
             width: 100%;
         }
 
@@ -133,9 +135,19 @@
             <div class="nav-item" id="btnCounter" onclick="loadPage('counterhulp.html', 'btnCounter')">
                 Counter
             </div>
+        </div>
 
+        <div class="nav-row bottom">
             <div class="nav-item" id="btnFatu" onclick="loadPage('vrouwfatu.html', 'btnFatu')">
                 Fatu
+            </div>
+
+            <div class="nav-item" id="btnUmit" onclick="loadPage('injury.html', 'btnUmit')">
+                Ümit
+            </div>
+
+            <div class="nav-item" id="btnKeeper" onclick="loadPage('keeper.html', 'btnKeeper')">
+                Keeper
             </div>
         </div>
     </nav>
