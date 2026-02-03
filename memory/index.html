@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hattrick Memory XL</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="potters.jpg"> 
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-container">
+            <img src="logo.png" alt="Hattrick" class="ht-logo">
+            <img src="potters.jpg" alt="Potters" class="pob-logo">
+        </div>
+        <h1>Carieb Shuffle</h1>
+    </div>
+
+    <div class="score-board">
+        <div class="score-item">
+            <span class="score-label">Pogingen</span>
+            <span id="moves" class="score-value">0</span>
+        </div>
+        <div class="score-item">
+            <span class="score-label">Gevonden</span>
+            <span id="matches" class="score-value">0 / 12</span>
+        </div>
+        <button class="reset-btn" onclick="resetGame()">Opnieuw</button>
+    </div>
+
+    <div class="game-grid" id="gameGrid">
+        </div>
+
+    <div id="winMessage" class="win-message">
+        <h3>Gefeliciteerd!</h3>
+        <p>Je hebt alle 12 paren gevonden.</p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

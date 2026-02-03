@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onderhoud - A je to!</title>
+    
+    <style>
+        /* Exacte stijlen overgenomen van stadion.html */
+        :root {
+            --ht-green: #3D7C3B;
+            --ht-yellow: #FFC200;
+            --ht-bg: #F0F4F0;
+            --ht-text: #333333;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: Verdana, 'Segoe UI', sans-serif;
+            background-color: var(--ht-bg);
+            color: var(--ht-text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Zorgt dat het op mobiel ook bovenaan begint */
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--white);
+            border-radius: 8px;
+            border-top: 4px solid var(--ht-green);
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+
+        .header { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        h1 { 
+            color: var(--ht-green); 
+            font-size: 1.3em; 
+            margin: 0; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+        }
+
+        /* Specifiek voor de Buurman foto */
+        .maintenance-image {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        /* Hergebruik van de quote-box stijl voor de uitleg */
+        .quote-box {
+            font-style: italic;
+            color: #555;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--ht-yellow);
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: var(--ht-green);
+            font-style: normal;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>Pagina in Onderhoud</h1>
+    </div>
+
+    <img src="buurman.jpg" alt="Buurman aan het klussen" class="maintenance-image">
+
+    <div class="quote-box">
+        <span class="highlight">A je to!</span><br><br>
+        "Er wordt hier nog even hard getimmerd en gezaagd. Buurman dacht dat hij de code wel even kon repareren met een hamer en wat ducttape.<br><br>
+        We zijn (hopelijk) snel weer terug!"
+    </div>
+</div>
+
+</body>
+</html>
