@@ -2,58 +2,218 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hattrick Memory - Online Topscores</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="potters.jpg"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Potter's Football Group</title>
     
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <link rel="apple-touch-icon" href="potters.jpg">
+    <link rel="icon" href="potters.jpg">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3D7C3B">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <style>
+        :root {
+            --ht-green: #3D7C3B;
+            --ht-green-dark: #2A5A29;
+            --ht-yellow: #FFC200;
+            --ht-bg: #f4f7f4;
+            --white: #ffffff;
+            --nav-width: 260px;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: 'Segoe UI', Verdana, sans-serif;
+            background-color: var(--ht-bg);
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar Navigatie */
+        nav {
+            width: var(--nav-width);
+            background-color: var(--ht-green-dark);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-header {
+            padding: 20px;
+            background-color: var(--ht-green);
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 4px solid var(--ht-yellow);
+        }
+
+        .nav-header h1 {
+            color: var(--white);
+            font-size: 1.1em;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-header .sub {
+            color: var(--ht-yellow);
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2px;
+            padding: 10px 0;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.85em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: var(--white);
+        }
+
+        .nav-item.active {
+            background-color: rgba(0,0,0,0.2);
+            color: var(--ht-yellow);
+            border-left: 4px solid var(--ht-yellow);
+        }
+
+        /* Content Area */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Mobiele Header */
+        .mobile-bar {
+            display: none;
+            background-color: var(--ht-green);
+            color: white;
+            padding: 10px 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .burger-btn {
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+        }
+
+        iframe {
+            width: 100%;
+            flex: 1;
+            border: none;
+            background-color: var(--ht-bg);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 850px) {
+            nav {
+                position: absolute;
+                transform: translateX(-100%);
+            }
+
+            nav.open {
+                transform: translateX(0);
+            }
+
+            .mobile-bar {
+                display: flex;
+            }
+
+            .nav-width-placeholder {
+                display: none;
+            }
+        }
+
+        /* Scrollbar styling */
+        .menu-grid::-webkit-scrollbar { width: 5px; }
+        .menu-grid::-webkit-scrollbar-thumb { background: var(--ht-green); }
+    </style>
 </head>
 <body>
 
-<div class="app-container">
-    <div class="header">
-        <div class="logo-container">
-            <img src="logo.png" alt="Hattrick" class="ht-logo">
-            <img src="potters.jpg" alt="Potters" class="pob-logo">
-        </div>
-        <h1>Memory (24 kaarten)</h1>
-    </div>
-
-    <div class="score-board">
-        <div class="score-item">
-            <span class="score-label">Pogingen</span>
-            <span id="moves" class="score-value">0</span>
-        </div>
-        <div class="score-item">
-            <span class="score-label">Gevonden</span>
-            <span id="matches" class="score-value">0 / 12</span>
-        </div>
-        <button class="reset-btn" onclick="resetGame()">Opnieuw</button>
-    </div>
-
-    <div class="leaderboard-panel">
-        <div class="leaderboard-title">🏆 Top 3 (Online - 7 dagen)</div>
-        <ul id="highScoreList" class="highscore-list">
-            <li><span>Laden...</span> <span></span></li>
-        </ul>
-    </div>
-
-    <div class="game-grid" id="gameGrid">
+    <nav id="sidebar">
+        <div class="nav-header" onclick="loadPage('welkom.html', 'head')">
+            <h1>Potter's Football Group</h1>
+            <div class="sub">Bestuurskamer</div>
         </div>
 
-    <div id="winMessage" class="win-message">
-        <h3>Wedstrijd Gewonnen!</h3>
-        <p>Je hebt alle 12 paren gevonden in <span id="finalMoves" style="font-weight:bold">0</span> pogingen.</p>
-        
-        <div class="input-area">
-            <input type="text" id="playerName" placeholder="Jouw Manager Naam" maxlength="15">
-            <button class="save-btn" onclick="saveScore()">Opslaan</button>
-        </div>
-    </div>
-</div>
+        <div class="menu-grid">
+            <a href="#" class="nav-item" onclick="loadPage('kantine.html', this)">Kantine</a>
+            <a href="#" class="nav-item" onclick="loadPage('vrouwfatu.html', this)">Vrouw Fatu</a>
+            <a href="#" class="nav-item" onclick="loadPage('injury.html', this)">Dokter Ümit</a>
+            <a href="#" class="nav-item" onclick="loadPage('keeper.html', this)">Keeperscout</a>
+            <a href="#" class="nav-item active" onclick="loadPage('scoutscore.html', this)">Jeugdscout</a>
+            <a href="#" class="nav-item" onclick="loadPage('counterhulp.html', this)">Counter-assistent</a>
+            <a href="#" class="nav-item" onclick="loadPage('mandekking.html', this)">Mandekking-assistent</a>
+            <a href="#" class="nav-item" onclick="loadPage('stadion.html', this)">Stadion-assistent</a>
+            <a href="#" class="nav-item" onclick="loadPage('memory/index.html', this)">Carieb Shuffle</a>
 
-<script src="script.js"></script>
+        </div>
+    </nav>
+
+    <main>
+        <div class="mobile-bar">
+            <button class="burger-btn" onclick="toggleMenu()">☰</button>
+            <div style="font-weight:bold; font-size:0.9em;">POTTER'S FOOTBALL GROUP</div>
+            <div style="width:24px;"></div> </div>
+        <iframe src="welkom.html" id="mainFrame" name="mainFrame"></iframe>
+    </main>
+
+    <script>
+        function loadPage(url, element) {
+            document.getElementById('mainFrame').src = url;
+
+            // Update actieve staat
+            if(element !== 'head') {
+                const items = document.querySelectorAll('.nav-item');
+                items.forEach(item => item.classList.remove('active'));
+                element.classList.add('active');
+            }
+
+            // Sluit menu op mobiel na klik
+            if (window.innerWidth <= 850) {
+                toggleMenu();
+            }
+        }
+
+        function toggleMenu() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        // Hoogte fix voor mobiel
+        function setHeight() {
+            document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+        }
+        window.addEventListener('resize', setHeight);
+        setHeight();
+    </script>
+
 </body>
 </html>
