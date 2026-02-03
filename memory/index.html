@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hattrick Memory XL</title>
+    <title>Hattrick Memory - Online Topscores</title>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="potters.jpg"> 
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -15,7 +18,7 @@
             <img src="logo.png" alt="Hattrick" class="ht-logo">
             <img src="potters.jpg" alt="Potters" class="pob-logo">
         </div>
-        <h1>Carieb Shuffle</h1>
+        <h1>Memory (24 kaarten)</h1>
     </div>
 
     <div class="score-board">
@@ -30,12 +33,24 @@
         <button class="reset-btn" onclick="resetGame()">Opnieuw</button>
     </div>
 
+    <div class="leaderboard-panel">
+        <div class="leaderboard-title">🏆 Top 3 (Online - 7 dagen)</div>
+        <ul id="highScoreList" class="highscore-list">
+            <li><span>Laden...</span> <span></span></li>
+        </ul>
+    </div>
+
     <div class="game-grid" id="gameGrid">
         </div>
 
     <div id="winMessage" class="win-message">
-        <h3>Gefeliciteerd!</h3>
-        <p>Je hebt alle 12 paren gevonden.</p>
+        <h3>Wedstrijd Gewonnen!</h3>
+        <p>Je hebt alle 12 paren gevonden in <span id="finalMoves" style="font-weight:bold">0</span> pogingen.</p>
+        
+        <div class="input-area">
+            <input type="text" id="playerName" placeholder="Jouw Manager Naam" maxlength="15">
+            <button class="save-btn" onclick="saveScore()">Opslaan</button>
+        </div>
     </div>
 </div>
 

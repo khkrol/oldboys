@@ -1,4 +1,23 @@
-// De lijst met spelers, gekoppeld aan de plaatjes
+// --- CONFIGURATIE (DIT MOET JIJ AANPASSEN) ---
+
+// PLAK HIERONDER JOUW 'firebaseConfig' DIE JE VAN GOOGLE HEBT GEKREGEN
+// Het ziet er ongeveer zo uit:
+const firebaseConfig = {
+  apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
+  authDomain: "oldboys-c58f9.firebaseapp.com",
+  projectId: "oldboys-c58f9",
+  storageBucket: "oldboys-c58f9.firebasestorage.app",
+  messagingSenderId: "23329894436",
+  appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
+};
+
+// --- EINDE CONFIGURATIE ---
+
+// Initialiseer Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Volledige set van 12 spelers
 const cardsData = [
     { img: 'kaart1.jpg', number: '#1', name: 'Ralph Cicilia' },
     { img: 'kaart2.jpg', number: '#2', name: 'Des Millerson' },
@@ -20,12 +39,15 @@ let lockBoard = false;
 let firstCard, secondCard;
 let moves = 0;
 let matches = 0;
-const totalPairs = cardsData.length; // Dit is 12
+const totalPairs = cardsData.length; 
 
 const grid = document.getElementById('gameGrid');
 const movesDisplay = document.getElementById('moves');
 const matchesDisplay = document.getElementById('matches');
 const winMsg = document.getElementById('winMessage');
+const finalMovesSpan = document.getElementById('finalMoves');
+const highScoreList = document.getElementById('highScoreList');
+const nameInput = document.getElementById('playerName');
 
 function initGame() {
     moves = 0;
@@ -38,27 +60,26 @@ function initGame() {
     movesDisplay.innerText = moves;
     matchesDisplay.innerText = `0 / ${totalPairs}`;
     winMsg.style.display = 'none';
+    nameInput.value = '';
     grid.innerHTML = '';
 
-    // Maak de paren (we kopiëren de lijst 2x)
+    // Online Leaderboard laden
+    loadLeaderboard();
+
+    // Kaarten klaarmaken
     let tempArray = [];
     cardsData.forEach((item) => {
-        tempArray.push({ ...item }); // Kopie 1
-        tempArray.push({ ...item }); // Kopie 2
+        tempArray.push({ ...item });
+        tempArray.push({ ...item });
     });
     
-    // Schudden
     cardsArray = tempArray.sort(() => 0.5 - Math.random());
 
-    // HTML genereren
     cardsArray.forEach((item) => {
         const card = document.createElement('div');
         card.classList.add('card');
-        
-        // We gebruiken het rugnummer + naam als unieke ID voor de match
         card.dataset.name = item.name;
 
-        // Hier voegen we de extra informatie toe in de HTML
         card.innerHTML = `
             <div class="card-face card-front">?</div>
             <div class="card-face card-back">
@@ -114,7 +135,7 @@ function disableCards() {
 
     if (matches === totalPairs) {
         setTimeout(() => {
-            winMsg.style.display = 'block';
+            showWinScreen();
         }, 500);
     }
 }
@@ -133,8 +154,86 @@ function resetBoard() {
     [firstCard, secondCard] = [null, null];
 }
 
+function showWinScreen() {
+    finalMovesSpan.innerText = moves;
+    winMsg.style.display = 'block';
+}
+
 function resetGame() {
     initGame();
+}
+
+// --- ONLINE FIREBASE FUNCTIES ---
+
+function saveScore() {
+    const name = nameInput.value.trim() || "Anoniem";
+    const score = moves;
+    const now = Date.now(); 
+
+    // Opslaan in de online database 'scores'
+    db.collection("scores").add({
+        name: name,
+        score: score,
+        date: now
+    })
+    .then(() => {
+        alert("Topscore online opgeslagen!");
+        resetGame();
+    })
+    .catch((error) => {
+        console.error("Fout bij opslaan: ", error);
+        alert("Kon niet verbinden met de database.");
+    });
+}
+
+function loadLeaderboard() {
+    const now = Date.now();
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    const weekAgo = now - sevenDaysInMs;
+
+    // Haal scores op: 
+    // 1. Waar datum > 7 dagen geleden
+    // 2. Sorteer op score (laagste eerst)
+    // 3. Maximaal 3 resultaten
+    
+    db.collection("scores")
+        .where("date", ">", weekAgo)
+        .orderBy("date") // Firebase vereist soms eerst sorteren op het filter veld
+        .get()
+        .then((querySnapshot) => {
+            let scores = [];
+            querySnapshot.forEach((doc) => {
+                scores.push(doc.data());
+            });
+
+            // Omdat we op datum filterden, moeten we nu nog sorteren op score (laag naar hoog)
+            scores.sort((a, b) => a.score - b.score);
+            
+            // Pak de top 3
+            const top3 = scores.slice(0, 3);
+
+            updateLeaderboardUI(top3);
+        })
+        .catch((error) => {
+            console.log("Nog geen index of fout:", error);
+            // Fallback als de query faalt (bijv. index nog niet aangemaakt)
+            highScoreList.innerHTML = '<li><span>Laden mislukt (Check console)</span></li>';
+        });
+}
+
+function updateLeaderboardUI(top3) {
+    highScoreList.innerHTML = '';
+    
+    if (top3.length === 0) {
+        highScoreList.innerHTML = '<li><span>Nog geen scores deze week</span></li>';
+        return;
+    }
+
+    top3.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${index + 1}. ${item.name}</span> <span>${item.score} pogingen</span>`;
+        highScoreList.appendChild(li);
+    });
 }
 
 window.onload = initGame;
