@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Potter's Football Group</title>
     
-    <link rel="apple-touch-icon" href="potters.jpg">
-    <link rel="icon" href="potters.jpg">
+    <link rel="apple-touch-icon" href="assets/images/potters.jpg">
+    <link rel="icon" href="assets/images/potters.jpg">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#3D7C3B">
     <meta name="mobile-web-app-capable" content="yes">
 
+    <link rel="stylesheet" href="css/global.css">
+
     <style>
+        /* OVERSCHRIJVEN GLOBAL CSS VOOR DE SHELL 
+           We willen hier geen gecentreerde kaart, maar een full-screen layout.
+        */
         :root {
-            --ht-green: #3D7C3B;
-            --ht-green-dark: #2A5A29;
-            --ht-yellow: #FFC200;
-            --ht-bg: #f4f7f4;
-            --white: #ffffff;
             --nav-width: 260px;
         }
 
@@ -26,22 +26,24 @@
             padding: 0;
             height: 100%;
             width: 100%;
-            font-family: 'Segoe UI', Verdana, sans-serif;
             background-color: var(--ht-bg);
-            display: flex;
+            display: flex; /* Dit overschrijft de center-logic van global.css indien nodig */
+            justify-content: flex-start;
+            align-items: stretch;
             overflow: hidden;
         }
 
         /* Sidebar Navigatie */
         nav {
             width: var(--nav-width);
-            background-color: var(--ht-green-dark);
+            background-color: var(--ht-green-dark); /* Variabele uit global.css */
             height: 100%;
             display: flex;
             flex-direction: column;
             box-shadow: 2px 0 10px rgba(0,0,0,0.2);
             z-index: 1000;
             transition: transform 0.3s ease;
+            flex-shrink: 0;
         }
 
         .nav-header {
@@ -67,8 +69,8 @@
         }
 
         .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr;
+            display: flex;
+            flex-direction: column;
             gap: 2px;
             padding: 10px 0;
             overflow-y: auto;
@@ -85,6 +87,7 @@
             align-items: center;
             transition: 0.2s;
             border-left: 4px solid transparent;
+            cursor: pointer;
         }
 
         .nav-item:hover {
@@ -104,6 +107,7 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            width: 100%;
         }
 
         /* Mobiele Header */
@@ -122,6 +126,7 @@
             background: none;
             border: none;
             color: white;
+            padding: 0;
         }
 
         iframe {
@@ -135,6 +140,8 @@
         @media (max-width: 850px) {
             nav {
                 position: absolute;
+                left: 0;
+                top: 0;
                 transform: translateX(-100%);
             }
 
@@ -144,10 +151,6 @@
 
             .mobile-bar {
                 display: flex;
-            }
-
-            .nav-width-placeholder {
-                display: none;
             }
         }
 
@@ -165,16 +168,15 @@
         </div>
 
         <div class="menu-grid">
-            <a href="#" class="nav-item" onclick="loadPage('kantine.html', this)">Kantine</a>
-            <a href="#" class="nav-item" onclick="loadPage('vrouwfatu.html', this)">Vrouw Fatu</a>
-            <a href="#" class="nav-item" onclick="loadPage('injury.html', this)">Dokter Ümit</a>
-            <a href="#" class="nav-item" onclick="loadPage('keeper.html', this)">Keeperscout</a>
-            <a href="#" class="nav-item active" onclick="loadPage('scoutscore.html', this)">Jeugdscout</a>
-            <a href="#" class="nav-item" onclick="loadPage('counterhulp.html', this)">Counter-assistent</a>
-            <a href="#" class="nav-item" onclick="loadPage('mandekking.html', this)">Mandekking-assistent</a>
-            <a href="#" class="nav-item" onclick="loadPage('stadion.html', this)">Stadion-assistent</a>
-            <a href="#" class="nav-item" onclick="loadPage('memory/index.html', this)">Carieb Shuffle</a>
-
+            <a class="nav-item" onclick="loadPage('tools/kantine.html', this)">Kantine</a>
+            <a class="nav-item" onclick="loadPage('tools/vrouwfatu.html', this)">Vrouw Fatu</a>
+            <a class="nav-item" onclick="loadPage('tools/injury.html', this)">Dokter Ümit</a>
+            <a class="nav-item" onclick="loadPage('tools/keeper.html', this)">Keeperscout</a>
+            <a class="nav-item" onclick="loadPage('tools/scoutscore.html', this)">Jeugdscout</a>
+            <a class="nav-item" onclick="loadPage('tools/counterhulp.html', this)">Counter-assistent</a>
+            <a class="nav-item" onclick="loadPage('tools/mandekking.html', this)">Mandekking-assistent</a>
+            <a class="nav-item" onclick="loadPage('tools/stadion.html', this)">Stadion-assistent</a>
+            <a class="nav-item" onclick="loadPage('memory/index.html', this)">Carieb Shuffle</a>
         </div>
     </nav>
 
@@ -182,7 +184,8 @@
         <div class="mobile-bar">
             <button class="burger-btn" onclick="toggleMenu()">☰</button>
             <div style="font-weight:bold; font-size:0.9em;">POTTER'S FOOTBALL GROUP</div>
-            <div style="width:24px;"></div> </div>
+            <div style="width:24px;"></div> 
+        </div>
         <iframe src="welkom.html" id="mainFrame" name="mainFrame"></iframe>
     </main>
 
@@ -207,7 +210,7 @@
             document.getElementById('sidebar').classList.toggle('open');
         }
 
-        // Hoogte fix voor mobiel
+        // Hoogte fix voor mobiel (viewport height fix)
         function setHeight() {
             document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
         }

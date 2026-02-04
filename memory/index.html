@@ -2,8 +2,9 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Hattrick Memory - Online Topscores</title>
+    
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="potters.jpg"> 
     
@@ -13,44 +14,46 @@
 <body>
 
 <div class="app-container">
-    <div class="header">
-        <div class="logo-container">
-            <img src="logo.png" alt="Hattrick" class="ht-logo">
-            <img src="potters.jpg" alt="Potters" class="pob-logo">
-        </div>
-        <h1>Memory (24 kaarten)</h1>
-    </div>
 
     <div class="score-board">
-        <div class="score-item">
-            <span class="score-label">Pogingen</span>
-            <span id="moves" class="score-value">0</span>
+        <div class="score-group">
+            <div class="score-item">
+                <span class="score-label">Pogingen</span>
+                <span id="moves" class="score-value">0</span>
+            </div>
+            <div class="score-item">
+                <span class="score-label">Matches</span>
+                <span id="matches" class="score-value">0/12</span>
+            </div>
         </div>
-        <div class="score-item">
-            <span class="score-label">Gevonden</span>
-            <span id="matches" class="score-value">0 / 12</span>
+        
+        <div class="btn-group">
+            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">🏆</button>
+            <button class="reset-btn" onclick="resetGame()">↻</button>
         </div>
-        <button class="reset-btn" onclick="resetGame()">Opnieuw</button>
     </div>
 
-    <div class="leaderboard-panel">
-        <div class="leaderboard-title">🏆 Top 3 (Online - 7 dagen)</div>
-        <ul id="highScoreList" class="highscore-list">
-            <li><span>Laden...</span> <span></span></li>
-        </ul>
-    </div>
+    <div class="game-grid" id="gameGrid"></div>
 
-    <div class="game-grid" id="gameGrid">
-        </div>
-
-    <div id="winMessage" class="win-message">
-        <h3>Wedstrijd Gewonnen!</h3>
-        <p>Je hebt alle 12 paren gevonden in <span id="finalMoves" style="font-weight:bold">0</span> pogingen.</p>
+    <div id="winMessage" class="win-message" style="display:none;">
+        <h3>Gewonnen!</h3>
+        <p>Je hebt het gehaald in <span id="finalMoves" style="font-weight:bold">0</span> pogingen.</p>
         
         <div class="input-area">
             <input type="text" id="playerName" placeholder="Jouw Manager Naam" maxlength="15">
             <button class="save-btn" onclick="saveScore()">Opslaan</button>
         </div>
+        <button class="close-msg-btn" onclick="resetGame()">Nog een keer</button>
+    </div>
+</div>
+
+<div id="leaderboardModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">🏆 Top 3 (Laatste 7 dagen)</div>
+        <ul id="highScoreList" class="highscore-list">
+            <li><span>Laden...</span></li>
+        </ul>
+        <button class="close-btn" onclick="closeLeaderboard()">Sluiten</button>
     </div>
 </div>
 

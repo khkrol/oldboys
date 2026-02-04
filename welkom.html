@@ -2,72 +2,17 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bestuurskamer - Potter's Old Boys</title>
     
-    <link rel="apple-touch-icon" href="potters.jpg">
-    <link rel="icon" href="potters.jpg">
+    <link rel="apple-touch-icon" href="assets/images/potters.jpg">
+    <link rel="icon" href="assets/images/potters.jpg">
     <meta name="theme-color" content="#3D7C3B">
+    
+    <link rel="stylesheet" href="css/global.css">
 
     <style>
-        :root {
-            --ht-green: #3D7C3B;
-            --ht-yellow: #FFC200;
-            --ht-bg: #F0F4F0;
-            --ht-text: #333333;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: Verdana, 'Segoe UI', sans-serif;
-            background-color: var(--ht-bg);
-            color: var(--ht-text);
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 450px;
-            background-color: var(--white);
-            border-radius: 8px;
-            border-top: 4px solid var(--ht-green);
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        /* Header exact overgenomen van counterhulp */
-        .header { 
-            text-align: center; 
-            margin-bottom: 20px; 
-            border-bottom: 2px solid #eee;
-            padding-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .ht-logo { width: 150px; height: auto; }
-        .pob-logo { width: 70px; height: auto; }
-
-        h1 { 
-            color: var(--ht-green); 
-            font-size: 1.3em; 
-            margin: 0; 
-            text-transform: uppercase; 
-            font-weight: bold;
-        }
-
+        /* Specifieke stijlen voor deze pagina */
         .intro-text {
             text-align: center;
             font-style: italic;
@@ -98,6 +43,8 @@
             height: auto;
             display: block;
             margin: 0 auto 10px auto;
+            border-radius: 4px; /* Kleine toevoeging voor netheid */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .member-name {
@@ -117,7 +64,7 @@
 
         .cta-section {
             background-color: var(--ht-green);
-            color: white;
+            color: var(--white);
             padding: 15px;
             border-radius: 8px;
             text-align: center;
@@ -144,7 +91,6 @@
             display: block;
             margin: 20px auto 0 auto;
         }
-
     </style>
 </head>
 <body>
@@ -152,8 +98,8 @@
 <div class="app-container">
     <div class="header">
         <div class="logo-container">
-            <img src="logo.png" alt="Hattrick" class="ht-logo">
-            <img src="potters.jpg" alt="Potters" class="pob-logo">
+            <img src="assets/images/logo.png" alt="Hattrick" class="ht-logo">
+            <img src="assets/images/potters.jpg" alt="Potters" class="pob-logo">
         </div>
         <h1>Bestuurskamer</h1>
     </div>
@@ -164,13 +110,13 @@
 
     <div class="board-members">
         <div class="member-card">
-            <img src="klaas.jpg" alt="Klaas" class="member-photo">
+            <img src="assets/images/klaas.jpg" alt="Klaas" class="member-photo">
             <span class="member-name">Klaas</span>
             <span class="member-role">Voorzitter</span>
         </div>
 
         <div class="member-card">
-            <img src="hammie.jpg" alt="Martin" class="member-photo">
+            <img src="assets/images/hammie.jpg" alt="Martin" class="member-photo">
             <span class="member-name">Martin</span>
             <span class="member-role">Voorzitter</span>
         </div>
@@ -183,7 +129,7 @@
         </div>
     </div>
 
-    <img src="jack.jpg" alt="Jack Daniels" class="bottle-image">
+    <img src="assets/images/jack.jpg" alt="Jack Daniels" class="bottle-image">
 
 </div>
 

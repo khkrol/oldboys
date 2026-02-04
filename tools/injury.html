@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dr. Ümit's Ziekenboeg</title>
+    
+    <link rel="apple-touch-icon" href="../assets/images/potters.jpg">
+    <link rel="icon" href="../assets/images/potters.jpg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#3D7C3B">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="../css/global.css">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../assets/images/logo.png" alt="Hattrick Logo" class="ht-logo">
+            <img src="../assets/images/potters.jpg" alt="Potter's Old Boys Logo" class="pob-logo">
+        </div>
+        <h1>Genezingscalculator</h1>
+    </div>
+
+    <div class="character-display">
+        <img src="images/umit.jpg" alt="Dr. Ümit" class="character-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <div>
+                    <span class="name-tag">Dr. Ümit:</span>
+                    <button class="info-btn" onclick="openModal()">i</button>
+                </div>
+                "Met deze data kan ik tot op de minuut nauwkeurig plannen. Tijd voor een wonderinjectie."
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Leeftijd van de speler</label>
+        <input type="number" id="age" value="25" min="17" max="50" oninput="berekenGenezing()">
+    </div>
+
+    <div class="input-group">
+        <label>Niveau Dokter (Staf)</label>
+        <select id="medic" onchange="berekenGenezing()">
+            <option value="0">Niveau 0 (Geen dokters)</option>
+            <option value="1">Niveau 1</option>
+            <option value="2">Niveau 2</option>
+            <option value="3">Niveau 3</option>
+            <option value="4">Niveau 4</option>
+            <option value="5" selected>Niveau 5</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Huidige blessure</label>
+        <div style="display:flex; gap:10px;">
+            <input type="number" id="injury" value="2.0" step="0.01" min="0" oninput="berekenGenezing()">
+        </div>
+        <div class="range-info">Gebruik TSIB (bijv. 2.40) voor precisie.</div>
+    </div>
+
+<div class="results-container">
+    <div class="result-box primary" id="boxHeal">
+        <div class="label-small">Volledig herstel</div>
+        <div class="val-large" id="updatesToHeal">0</div>
+        <div class="val-sub">Updates (Dagen)</div>
+    </div>
+
+    <div class="result-box secondary" id="boxBruise">
+        <div class="label-small">Terug op het veld</div>
+        <div class="val-large" id="updatesToPlay">0</div>
+        <div class="val-sub">Updates (Dagen)</div>
+    </div>
+</div>
+
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Hoe werkt deze berekening?</div>
+        <p>Deze calculator gebruikt de officiële HT-Tools genezingsmatrix.</p>
+        <ul>
+            <li><strong>Matrix:</strong> Een tabel met exacte genezingswaarden per leeftijd en doktersniveau.</li>
+            <li><strong>Berekening:</strong> We delen je blessure door de 'genezing per update' factor uit de matrix.</li>
+        </ul>
+        <p style="font-size:0.8em; color:#666;">
+            <strong>Kneuzing:</strong> Zodra de blessure onder de 1.00 zakt, kan de speler weer opgesteld worden (hij speelt dan wel iets minder goed).
+        </p>
+        <button class="close-btn" onclick="closeModal()">Sluiten</button>
+    </div>
+</div>
+
+<script>
+    function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+
+    const healingTable = [
+        [0.02279, 0.02735, 0.03191, 0.03646, 0.04102, 0.04558], // 17
+        [0.02174, 0.02609, 0.03044, 0.03478, 0.03913, 0.04348], // 18
+        [0.02069, 0.02483, 0.02897, 0.0331, 0.03724, 0.04138],  // 19
+        [0.01964, 0.02357, 0.0275, 0.03142, 0.03535, 0.03928],  // 20
+        [0.01859, 0.02231, 0.02603, 0.02974, 0.03346, 0.03718], // 21
+        [0.01754, 0.02105, 0.02456, 0.02806, 0.03157, 0.03508], // 22
+        [0.0165, 0.0198, 0.0231, 0.0264, 0.0297, 0.033],        // 23
+        [0.01545, 0.01854, 0.02163, 0.02472, 0.02781, 0.0309],  // 24
+        [0.0144, 0.01728, 0.02016, 0.02304, 0.02592, 0.0288],   // 25
+        [0.01335, 0.01602, 0.01869, 0.02136, 0.02403, 0.0267],  // 26
+        [0.0123, 0.01476, 0.01722, 0.01968, 0.02214, 0.0246],   // 27
+        [0.01125, 0.0135, 0.01575, 0.018, 0.02025, 0.0225],     // 28
+        [0.0102, 0.01224, 0.01428, 0.01632, 0.01836, 0.0204],   // 29
+        [0.00915, 0.01098, 0.01281, 0.01464, 0.01647, 0.0183],  // 30
+        [0.00811, 0.00973, 0.01135, 0.01298, 0.0146, 0.01622],  // 31
+        [0.00706, 0.00847, 0.00988, 0.0113, 0.01271, 0.01412],  // 32
+        [0.00601, 0.00721, 0.00841, 0.00962, 0.01082, 0.01202], // 33
+        [0.00496, 0.00595, 0.00694, 0.00794, 0.00893, 0.00992], // 34
+        [0.00391, 0.00469, 0.00547, 0.00626, 0.00704, 0.00782], // 35
+        [0.00286, 0.00343, 0.004, 0.00458, 0.00515, 0.00572],   // 36
+        [0.00181, 0.00217, 0.00253, 0.0029, 0.00326, 0.00362],  // 37
+        [0.00077, 0.00092, 0.00108, 0.00123, 0.00139, 0.00154]  // 38+
+    ];
+
+    function berekenGenezing() {
+        let age = parseInt(document.getElementById('age').value) || 17;
+        let docs = parseInt(document.getElementById('medic').value) || 0;
+        let weeks = parseFloat(document.getElementById('injury').value) || 0;
+
+        if (weeks <= 0) {
+            updateUI(0, 0);
+            return;
+        }
+
+        let ageIndex = age - 17;
+        if (ageIndex < 0) ageIndex = 0;
+        if (ageIndex >= healingTable.length) ageIndex = healingTable.length - 1;
+
+        let healingFactor = healingTable[ageIndex][docs] * 10;
+        let rawUpdatesToPlay = (weeks - 0.99) / healingFactor;
+        let rawUpdatesToHeal = weeks / healingFactor;
+
+        if (rawUpdatesToPlay < 0) rawUpdatesToPlay = 0;
+        
+        let finalPlay = Math.ceil(rawUpdatesToPlay);
+        let finalHeal = Math.ceil(rawUpdatesToHeal);
+
+        updateUI(finalPlay, finalHeal);
+    }
+
+    function updateUI(play, heal) {
+        const playEl = document.getElementById('updatesToPlay');
+        const healEl = document.getElementById('updatesToHeal');
+        const healBox = document.getElementById('boxHeal');
+
+        playEl.innerText = play === 0 ? "NU" : play;
+        healEl.innerText = heal;
+
+        // Gebruik de global CSS .alert class voor lange blessures
+        if (heal > 21) {
+            healBox.classList.remove('primary');
+            healBox.classList.add('alert');
+        } else {
+            healBox.classList.remove('alert');
+            healBox.classList.add('primary');
+        }
+    }
+
+document.addEventListener('DOMContentLoaded', berekenGenezing);
+</script>
+
+</body>
+</html>

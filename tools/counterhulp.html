@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Potter's Counterhulp v2.5</title>
+    
+    <link rel="apple-touch-icon" href="../assets/images/potters.jpg">
+    <link rel="icon" href="../assets/images/potters.jpg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#3D7C3B">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="../css/global.css">
+
+    <style>
+        /* Specifieke stijlen voor de tabellen in de Counterhulp */
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dotted #eee;
+            padding: 6px 0;
+            font-size: 0.9em;
+        }
+        .calc-row:last-child { border-bottom: none; }
+        
+        .calc-head { 
+            font-weight: bold; 
+            margin-top: 15px; 
+            margin-bottom: 6px; 
+            color: var(--ht-green); 
+            text-transform: uppercase;
+            font-size: 0.85em;
+        }
+        
+        .highlight { font-weight: bold; color: var(--ht-green); }
+        
+        /* Waarschuwingsblokken */
+        .warning { 
+            color: var(--red-alert); 
+            font-weight: bold; 
+            font-size: 0.9em; 
+            margin-top: 10px; 
+            display: none; 
+            text-align: center;
+            padding: 10px;
+            background: #fff5f5;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../assets/images/logo.png" alt="Hattrick Logo" class="ht-logo">
+            <img src="../assets/images/potters.jpg" alt="Potter's Old Boys Logo" class="pob-logo">
+        </div>
+        <h1>Counterhulp</h1>
+    </div>
+
+    <div class="character-display">
+        <img src="images/armadillo.jpg" alt="Atanasio 'Armadillo' Ardila" class="character-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <div>
+                    <span class="name-tag">Atanasio 'Armadillo' Ardila:</span>
+                    <button class="info-btn" onclick="openModal()" title="Toon gedetailleerde berekening">i</button>
+                </div>
+                <span id="adviesText">...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <div class="row-3">
+            <div>
+                <label>Jouw midfield</label>
+                <input type="number" id="mid_self" value="20" oninput="bereken()">
+            </div>
+            <div>
+                <label>Midfield tegenst.</label>
+                <input type="number" id="mid_opp" value="25" oninput="bereken()">
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Tactiekvaardigheid (basis)</label>
+        <input type="number" id="tl_basis" value="12" step="0.5" oninput="bereken()">
+        <div class="range-info">Gebaseerd op verdedigen en passen verdedigers.</div>
+    </div>
+
+    <div class="input-group">
+        <label>Snelle spelers (boost)</label>
+        <input type="number" id="q_total" value="0" min="0" max="10" oninput="bereken()">
+        <div class="range-info">Aantal snelle mids, wings en aanvallers.</div>
+    </div>
+
+    <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+    <div class="label-small text-center" style="margin-bottom:10px;">Aanval (Jij) vs Verdediging (Zij)</div>
+
+    <div class="input-group">
+        <label>Jouw aanval (L - C - R)</label>
+        <div class="row-3">
+            <input type="number" id="att_self_l" value="15" placeholder="L" oninput="bereken()">
+            <input type="number" id="att_self_c" value="15" placeholder="C" oninput="bereken()">
+            <input type="number" id="att_self_r" value="15" placeholder="R" oninput="bereken()">
+        </div>
+    </div>
+    <div class="input-group">
+        <label>Verdediging tegenstander (R - C - L)</label>
+        <div class="row-3">
+            <input type="number" id="def_opp_r" value="15" placeholder="R" oninput="bereken()">
+            <input type="number" id="def_opp_c" value="15" placeholder="C" oninput="bereken()">
+            <input type="number" id="def_opp_l" value="15" placeholder="L" oninput="bereken()">
+        </div>
+    </div>
+
+    <hr style="border:0; border-top:1px solid #eee; margin: 20px 0;">
+    <div class="label-small text-center" style="margin-bottom:10px;">Verdediging (Jij) vs Aanval (Zij)</div>
+
+    <div class="input-group">
+        <label>Jouw verdediging (L - C - R)</label>
+        <div class="row-3">
+            <input type="number" id="def_self_l" value="20" placeholder="L" oninput="bereken()">
+            <input type="number" id="def_self_c" value="20" placeholder="C" oninput="bereken()">
+            <input type="number" id="def_self_r" value="20" placeholder="R" oninput="bereken()">
+        </div>
+    </div>
+    <div class="input-group">
+        <label>Aanval tegenstander (R - C - L)</label>
+        <div class="row-3">
+            <input type="number" id="att_opp_r" value="15" placeholder="R" oninput="bereken()">
+            <input type="number" id="att_opp_c" value="15" placeholder="C" oninput="bereken()">
+            <input type="number" id="att_opp_l" value="15" placeholder="L" oninput="bereken()">
+        </div>
+    </div>
+
+    <div class="results-container">
+        <div class="result-box primary">
+            <div class="label-small">Effectiviteit</div>
+            <div class="val-large" id="ratingVal">0/20</div>
+            <div class="val-sub" id="ratingLabel">Niet-bestaand</div>
+        </div>
+
+        <div class="result-box secondary">
+            <div class="label-small">Delta xG</div>
+            <div class="val-large" id="deltaXg">0,00</div>
+            <div class="val-sub" style="opacity:0;">-</div>
+        </div>
+    </div>
+
+    <div id="tlWarning" class="warning">⚠️ Tactiekvaardigheid te laag (&lt;10)!</div>
+    <div id="posWarning" class="warning">⚠️ Je wint het middenveld! Counter werkt niet.</div>
+
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Gedetailleerde Analyse</div>
+        
+        <div class="calc-head" style="margin-top:0;">SCENARIO NORMAAL</div>
+        <div class="calc-row"><span>xG Potter's:</span> <span class="text-bold" id="disp_xg_self_norm">0.00</span></div>
+        <div class="calc-row"><span>xG tegenstander:</span> <span class="text-bold" id="disp_xg_opp_norm">0.00</span></div>
+        <div class="calc-row" style="border-top:1px dotted #ccc;"><span>Netto:</span> <span class="text-bold" id="disp_xg_norm">0.00</span></div>
+
+        <div class="calc-head">SCENARIO COUNTER</div>
+        <div class="calc-row"><span>Netto (na straf):</span> <span class="text-bold" id="disp_xg_net_pen" style="color:#d9534f;">0.00</span></div>
+        <div class="calc-row"><span>Gewonnen xG:</span> <span class="text-bold" id="disp_gain_ca" style="color:var(--ht-green);">+0.00</span></div>
+        <div style="font-size:0.8em; color:#888; text-align:right;">(Conversie: <span id="disp_conv_perc">0%</span>)</div>
+
+        <div class="calc-head">EINDRESULTAAT</div>
+        <div class="calc-row"><span>Verschil (Delta):</span> <span class="text-bold" id="disp_delta">0.00</span></div>
+
+        <p style="font-size:0.8em; color:#666; margin-top:15px; line-height:1.4;">
+            * Een positieve Delta betekent dat counteren statistisch voordeel oplevert.<br>
+            * Conversie hangt af van je tactiekvaardigheid.
+        </p>
+        
+        <button class="close-btn" onclick="closeModal()">Sluiten</button>
+    </div>
+</div>
+
+<script>
+    // Nieuwe functies voor de Modal
+    function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+
+    function calcProb(att, def) {
+        att = parseFloat(att) || 0;
+        def = parseFloat(def) || 0;
+        if (att === 0 && def === 0) return 0.5;
+        let num = Math.pow(att, 3.5);
+        let den = Math.pow(att, 3.5) + Math.pow(def, 3.5);
+        if (den === 0) return 0;
+        return num / den;
+    }
+
+    function bereken() {
+        let midSelf = parseFloat(document.getElementById('mid_self').value) || 0;
+        let midOpp = parseFloat(document.getElementById('mid_opp').value) || 0;
+        
+        let tlBasis = parseFloat(document.getElementById('tl_basis').value) || 0;
+        let qTotal = parseFloat(document.getElementById('q_total').value) || 0;
+
+        let attSelfL = parseFloat(document.getElementById('att_self_l').value) || 0;
+        let attSelfC = parseFloat(document.getElementById('att_self_c').value) || 0;
+        let attSelfR = parseFloat(document.getElementById('att_self_r').value) || 0;
+        
+        let defOppR = parseFloat(document.getElementById('def_opp_r').value) || 0;
+        let defOppC = parseFloat(document.getElementById('def_opp_c').value) || 0;
+        let defOppL = parseFloat(document.getElementById('def_opp_l').value) || 0;
+
+        let defSelfL = parseFloat(document.getElementById('def_self_l').value) || 0;
+        let defSelfC = parseFloat(document.getElementById('def_self_c').value) || 0;
+        let defSelfR = parseFloat(document.getElementById('def_self_r').value) || 0;
+
+        let attOppR = parseFloat(document.getElementById('att_opp_r').value) || 0;
+        let attOppC = parseFloat(document.getElementById('att_opp_c').value) || 0;
+        let attOppL = parseFloat(document.getElementById('att_opp_l').value) || 0;
+
+        // Logica
+        let quickBoost = Math.min(2.8, qTotal * 0.6); 
+        let tlTotal = tlBasis + quickBoost;
+        
+        document.getElementById('tlWarning').style.display = (tlTotal < 10) ? 'block' : 'none';
+
+        let pSelfL = calcProb(attSelfL, defOppR);
+        let pSelfC = calcProb(attSelfC, defOppC);
+        let pSelfR = calcProb(attSelfR, defOppL);
+        let avgAttSelf = (pSelfL + pSelfC + pSelfR) / 3;
+        let wScoreSelf = (0.35 * pSelfC) + (0.25 * pSelfL) + (0.25 * pSelfR) + (0.15 * avgAttSelf);
+
+        let pOppL = calcProb(attOppL, defSelfR);
+        let pOppC = calcProb(attOppC, defSelfC);
+        let pOppR = calcProb(attOppR, defSelfL);
+        let avgAttOpp = (pOppL + pOppC + pOppR) / 3;
+        let wScoreOpp = (0.35 * pOppC) + (0.25 * pOppL) + (0.25 * pOppR) + (0.15 * avgAttOpp);
+
+        let posShareNorm = midSelf / (midSelf + midOpp);
+        if (isNaN(posShareNorm)) posShareNorm = 0.5;
+        let winsMidfield = posShareNorm > 0.50; 
+        document.getElementById('posWarning').style.display = (winsMidfield) ? 'block' : 'none';
+
+        let chancesSelfNorm = 10 * posShareNorm;
+        let chancesOppNorm = 10 * (1 - posShareNorm);
+        
+        let xGSelfNorm = chancesSelfNorm * wScoreSelf;
+        let xGOppNorm = chancesOppNorm * wScoreOpp;
+        let xGNorm = xGSelfNorm - xGOppNorm;
+
+        let midSelfCa = midSelf * 0.93; 
+        let posShareCa = midSelfCa / (midSelfCa + midOpp);
+        if (isNaN(posShareCa)) posShareCa = 0.5;
+
+        let chancesSelfCaBase = 10 * posShareCa;
+        let chancesOppCaBase = 10 * (1 - posShareCa);
+        
+        let xGSelfPen = chancesSelfCaBase * wScoreSelf;
+        let xGOppPen = chancesOppCaBase * wScoreOpp;
+        let xGNetPen = xGSelfPen - xGOppPen; 
+
+        let stops = chancesOppCaBase * (1 - wScoreOpp);
+        let conversionRate = 0;
+        if (tlTotal > 5) {
+             conversionRate = 0.48 * (1 - Math.exp(-0.085 * (tlTotal - 5)));
+        }
+        if (conversionRate < 0) conversionRate = 0;
+        
+        let extraCa = stops * conversionRate;
+        let xGFromCounters = extraCa * wScoreSelf;
+        let xGCaTotal = xGNetPen + xGFromCounters;
+        let deltaXg = xGCaTotal - xGNorm;
+
+        const labels = [
+            "Niet-bestaand", "Rampzalig", "Waardeloos", "Slecht", "Zwak",
+            "Matig", "Redelijk", "Goed", "Uitstekend", "Formidabel",
+            "Uitmuntend", "Briljant", "Wonderbaarlijk", "Wereldklasse", "Bovennatuurlijk",
+            "Reusachtig", "Buitenaards", "Mythisch", "Magisch", "Utopisch", "Goddelijk"
+        ];
+
+        let ratingIndex = 0;
+        if (winsMidfield) {
+            ratingIndex = 0; 
+        } else if (deltaXg <= 0) {
+            ratingIndex = 0; 
+        } else {
+            ratingIndex = Math.floor(deltaXg * 6) + 1;
+            if (ratingIndex > 20) ratingIndex = 20;
+            if (ratingIndex < 1) ratingIndex = 1;
+        }
+
+        let adviesLabel = labels[ratingIndex];
+        let adviesZinHTML = ""; 
+
+        if (posShareNorm > 0.55) {
+            adviesZinHTML = "Je hebt het overwicht op het middenveld (>55%). Counteren is <span class='highlight'>tactisch onlogisch</span>.";
+        } else if (deltaXg <= 0) {
+            adviesZinHTML = "Counteren levert <span class='highlight'>geen voordeel</span> op. Je verliest meer kansen dan je wint.";
+        } else {
+            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()}</span>. Counteren levert je een tactisch voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
+        }
+
+        document.getElementById('ratingVal').innerText = ratingIndex + "/20";
+        document.getElementById('ratingLabel').innerText = adviesLabel;
+        document.getElementById('deltaXg').innerText = (deltaXg > 0 ? "+" : "") + deltaXg.toFixed(2);
+        document.getElementById('adviesText').innerHTML = adviesZinHTML;
+
+        // Debug Panel data invullen in de nieuwe Modal locaties
+        document.getElementById('disp_xg_self_norm').innerText = xGSelfNorm.toFixed(2);
+        document.getElementById('disp_xg_opp_norm').innerText = xGOppNorm.toFixed(2);
+        document.getElementById('disp_xg_norm').innerText = xGNorm.toFixed(2);
+        
+        document.getElementById('disp_xg_self_pen').innerText = xGSelfPen.toFixed(2);
+        document.getElementById('disp_xg_opp_pen').innerText = xGOppPen.toFixed(2);
+        document.getElementById('disp_xg_net_pen').innerText = xGNetPen.toFixed(2);
+        
+        document.getElementById('disp_gain_ca').innerText = "+" + xGFromCounters.toFixed(2);
+        document.getElementById('disp_conv_perc').innerText = Math.round(conversionRate * 100) + "%";
+
+        document.getElementById('disp_delta').innerText = deltaXg.toFixed(2);
+    }
+
+    document.addEventListener('DOMContentLoaded', bereken);
+</script>
+
+</body>
+</html>

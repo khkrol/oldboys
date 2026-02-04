@@ -1,7 +1,7 @@
 // --- CONFIGURATIE (DIT MOET JIJ AANPASSEN) ---
+// Let op: Ik heb de config hier even ingekort voor het overzicht, 
+// maar laat jouw originele config staan!
 
-// PLAK HIERONDER JOUW 'firebaseConfig' DIE JE VAN GOOGLE HEBT GEKREGEN
-// Het ziet er ongeveer zo uit:
 const firebaseConfig = {
   apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
   authDomain: "oldboys-c58f9.firebaseapp.com",
@@ -13,24 +13,23 @@ const firebaseConfig = {
 
 // --- EINDE CONFIGURATIE ---
 
-// Initialiseer Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Volledige set van 12 spelers
+// 12 spelers
 const cardsData = [
-    { img: 'kaart1.jpg', number: '#1', name: 'Ralph Cicilia' },
-    { img: 'kaart2.jpg', number: '#2', name: 'Des Millerson' },
-    { img: 'kaart3.jpg', number: '#3', name: 'Gedeon Nepomuceno' },
-    { img: 'kaart4.jpg', number: '#4', name: 'Moises van Heydoorn' },
-    { img: 'kaart5.jpg', number: '#5', name: 'Ozzie Willems' },
-    { img: 'kaart6.jpg', number: '#6', name: 'Edmar Pieter' },
-    { img: 'kaart7.jpg', number: '#7', name: 'John Leepel' },
-    { img: 'kaart8.jpg', number: '#8', name: 'Liemarvin Martina' },
-    { img: 'kaart9.jpg', number: '#9', name: 'Eloy Coffie' },
-    { img: 'kaart10.jpg', number: '#10', name: 'Sherman Symor' },
-    { img: 'kaart11.jpg', number: '#11', name: 'Franklin Croes' },
-    { img: 'kaart12.jpg', number: '#12', name: 'Andruw Cijntje' }
+    { img: 'images/kaart1.jpg', number: '#1', name: 'Ralph Cicilia' },
+    { img: 'images/kaart2.jpg', number: '#2', name: 'Des Millerson' },
+    { img: 'images/kaart3.jpg', number: '#3', name: 'Gedeon Nepomuceno' },
+    { img: 'images/kaart4.jpg', number: '#4', name: 'Moises van Heydoorn' },
+    { img: 'images/kaart5.jpg', number: '#5', name: 'Ozzie Willems' },
+    { img: 'images/kaart6.jpg', number: '#6', name: 'Edmar Pieter' },
+    { img: 'images/kaart7.jpg', number: '#7', name: 'John Leepel' },
+    { img: 'images/kaart8.jpg', number: '#8', name: 'Liemarvin Martina' },
+    { img: 'images/kaart9.jpg', number: '#9', name: 'Eloy Coffie' },
+    { img: 'images/kaart10.jpg', number: '#10', name: 'Sherman Symor' },
+    { img: 'images/kaart11.jpg', number: '#11', name: 'Franklin Croes' },
+    { img: 'images/kaart12.jpg', number: '#12', name: 'Andruw Cijntje' }
 ];
 
 let cardsArray = [];
@@ -58,15 +57,15 @@ function initGame() {
     secondCard = null;
     
     movesDisplay.innerText = moves;
-    matchesDisplay.innerText = `0 / ${totalPairs}`;
+    matchesDisplay.innerText = `0/${totalPairs}`;
     winMsg.style.display = 'none';
-    nameInput.value = '';
+    if(nameInput) nameInput.value = '';
     grid.innerHTML = '';
 
-    // Online Leaderboard laden
+    // Leaderboard laden (maar nu op de achtergrond voor de modal)
     loadLeaderboard();
 
-    // Kaarten klaarmaken
+    // Kaarten dupliceren en schudden
     let tempArray = [];
     cardsData.forEach((item) => {
         tempArray.push({ ...item });
@@ -85,8 +84,7 @@ function initGame() {
             <div class="card-face card-back">
                 <img src="${item.img}" alt="${item.name}">
                 <div class="player-info">
-                    <span class="player-number">${item.number}</span>
-                    <span class="player-name">${item.name}</span>
+                    <span class="player-name">${item.number} ${item.name}</span>
                 </div>
             </div>
         `;
@@ -130,7 +128,7 @@ function disableCards() {
     secondCard.removeEventListener('click', flipCard);
 
     matches++;
-    matchesDisplay.innerText = `${matches} / ${totalPairs}`;
+    matchesDisplay.innerText = `${matches}/${totalPairs}`;
     resetBoard();
 
     if (matches === totalPairs) {
@@ -163,14 +161,31 @@ function resetGame() {
     initGame();
 }
 
-// --- ONLINE FIREBASE FUNCTIES ---
+// --- MODAL FUNCTIES (NIEUW) ---
+function openLeaderboard() {
+    document.getElementById('leaderboardModal').style.display = 'flex';
+    loadLeaderboard(); // Verversen bij openen
+}
+
+function closeLeaderboard() {
+    document.getElementById('leaderboardModal').style.display = 'none';
+}
+
+// Sluit modal als je ernaast klikt
+window.onclick = function(event) {
+    const modal = document.getElementById('leaderboardModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+// --- FIREBASE FUNCTIES ---
 
 function saveScore() {
     const name = nameInput.value.trim() || "Anoniem";
     const score = moves;
     const now = Date.now(); 
 
-    // Opslaan in de online database 'scores'
     db.collection("scores").add({
         name: name,
         score: score,
@@ -178,7 +193,8 @@ function saveScore() {
     })
     .then(() => {
         alert("Topscore online opgeslagen!");
-        resetGame();
+        winMsg.style.display = 'none'; // Sluit win scherm
+        openLeaderboard(); // Toon direct de ranglijst
     })
     .catch((error) => {
         console.error("Fout bij opslaan: ", error);
@@ -191,14 +207,9 @@ function loadLeaderboard() {
     const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
     const weekAgo = now - sevenDaysInMs;
 
-    // Haal scores op: 
-    // 1. Waar datum > 7 dagen geleden
-    // 2. Sorteer op score (laagste eerst)
-    // 3. Maximaal 3 resultaten
-    
     db.collection("scores")
         .where("date", ">", weekAgo)
-        .orderBy("date") // Firebase vereist soms eerst sorteren op het filter veld
+        .orderBy("date") 
         .get()
         .then((querySnapshot) => {
             let scores = [];
@@ -206,18 +217,13 @@ function loadLeaderboard() {
                 scores.push(doc.data());
             });
 
-            // Omdat we op datum filterden, moeten we nu nog sorteren op score (laag naar hoog)
             scores.sort((a, b) => a.score - b.score);
-            
-            // Pak de top 3
             const top3 = scores.slice(0, 3);
-
             updateLeaderboardUI(top3);
         })
         .catch((error) => {
-            console.log("Nog geen index of fout:", error);
-            // Fallback als de query faalt (bijv. index nog niet aangemaakt)
-            highScoreList.innerHTML = '<li><span>Laden mislukt (Check console)</span></li>';
+            console.log("Error loading scores:", error);
+            highScoreList.innerHTML = '<li><span>Laden mislukt</span></li>';
         });
 }
 
@@ -231,9 +237,15 @@ function updateLeaderboardUI(top3) {
 
     top3.forEach((item, index) => {
         const li = document.createElement('li');
-        li.innerHTML = `<span>${index + 1}. ${item.name}</span> <span>${item.score} pogingen</span>`;
+        // Compactere weergave voor mobiel
+        li.innerHTML = `
+            <span style="font-weight:bold; color:var(--ht-green)">#${index + 1}</span>
+            <span style="flex:1; margin-left:10px;">${item.name}</span> 
+            <span style="font-weight:bold">${item.score}</span>
+        `;
         highScoreList.appendChild(li);
     });
 }
 
-window.onload = initGame;
+// Moderne manier van laden
+document.addEventListener('DOMContentLoaded', initGame);

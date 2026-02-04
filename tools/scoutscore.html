@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hattrick Scoutscore</title>
+    
+    <link rel="apple-touch-icon" href="../assets/images/potters.jpg">
+    <link rel="icon" href="../assets/images/potters.jpg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#3D7C3B">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="../css/global.css">
+
+    <style>
+        /* Specifieke stijl voor het woord in de quote */
+        #emileQuoteWord { font-weight: bold; color: var(--ht-green); }
+        
+        /* Lijstjes in de modal */
+        ul { padding-left: 20px; margin: 10px 0; }
+        li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../assets/images/logo.png" alt="Hattrick Logo" class="ht-logo">
+            <img src="../assets/images/potters.jpg" alt="Potter's Old Boys Logo" class="pob-logo">
+        </div>
+        <h1>Scoutscore Calculator</h1>
+    </div>
+
+    <div class="character-display">
+        <img src="images/emile.jpg" alt="Emile 'De Neus' Muntz" class="character-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <div>
+                    <span class="name-tag">Emile 'De Neus' Muntz:</span>
+                    <button class="info-btn" onclick="openModal()">i</button>
+                </div>
+                "Dit is volgens mij een <span id="emileQuoteWord">...</span> talent!"
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Leeftijd</label>
+        <select id="leeftijd" onchange="bereken()">
+            <option value="1">15 Jaar</option>
+            <option value="0" selected>16 Jaar</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Huidig vaardigheidsniveau</label>
+        <select id="huidig" onchange="bereken()">
+            <option value="0">Onbekend (0)</option><option value="0">Niet-bestaand (0)</option><option value="1">Rampzalig (1)</option>
+            <option value="2">Waardeloos (2)</option><option value="3">Slecht (3)</option><option value="4" selected>Zwak (4)</option>
+            <option value="5">Matig (5)</option><option value="6">Redelijk (6)</option><option value="7">Goed (7)</option>
+            <option value="8">Uitstekend (8)</option><option value="9">Formidabel (9)</option><option value="10">Uitmuntend (10)</option>
+            <option value="11">Briljant (11)</option><option value="12">Wonderbaarlijk (12)</option><option value="13">Wereldklasse (13)</option>
+            <option value="14">Bovennatuurlijk (14)</option><option value="15">Reusachtig (15)</option><option value="16">Buitenaards (16)</option>
+            <option value="17">Mythisch (17)</option><option value="18">Magisch (18)</option><option value="19">Utopisch (19)</option><option value="20">Goddelijk (20)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Potentieel vaardigheidsniveau</label>
+        <select id="potentieel" onchange="bereken()">
+            <option value="0">Onbekend (0)</option><option value="0">Niet-bestaand (0)</option><option value="1">Rampzalig (1)</option>
+            <option value="2">Waardeloos (2)</option><option value="3">Slecht (3)</option><option value="4">Zwak (4)</option>
+            <option value="5">Matig (5)</option><option value="6">Redelijk (6)</option><option value="7" selected>Goed (7)</option>
+            <option value="8">Uitstekend (8)</option><option value="9">Formidabel (9)</option><option value="10">Uitmuntend (10)</option>
+            <option value="11">Briljant (11)</option><option value="12">Wonderbaarlijk (12)</option><option value="13">Wereldklasse (13)</option>
+            <option value="14">Bovennatuurlijk (14)</option><option value="15">Reusachtig (15)</option><option value="16">Buitenaards (16)</option>
+            <option value="17">Mythisch (17)</option><option value="18">Magisch (18)</option><option value="19">Utopisch (19)</option><option value="20">Goddelijk (20)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Gemiddeld vaardigheidsniveau</label>
+        <select id="gemiddeld" onchange="bereken()">
+            <option value="0" selected>Onbekend (0)</option><option value="0">Niet-bestaand (0)</option><option value="1">Rampzalig (1)</option>
+            <option value="2">Waardeloos (2)</option><option value="3">Slecht (3)</option><option value="4">Zwak (4)</option>
+            <option value="5">Matig (5)</option><option value="6">Redelijk (6)</option><option value="7">Goed (7)</option>
+            <option value="8">Uitstekend (8)</option><option value="9">Formidabel (9)</option><option value="10">Uitmuntend (10)</option>
+            <option value="11">Briljant (11)</option><option value="12">Wonderbaarlijk (12)</option><option value="13">Wereldklasse (13)</option>
+            <option value="14">Bovennatuurlijk (14)</option><option value="15">Reusachtig (15)</option><option value="16">Buitenaards (16)</option>
+            <option value="17">Mythisch (17)</option><option value="18">Magisch (18)</option><option value="19">Utopisch (19)</option><option value="20">Goddelijk (20)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>Specialiteit</label>
+        <select id="spec" onchange="bereken()">
+            <option value="1">Ja</option>
+            <option value="0" selected>Nee</option>
+        </select>
+    </div>
+
+    <div class="results-container">
+        <div class="result-box primary">
+            <div class="label-small">Scoutscore</div>
+            <div class="val-large" id="scoreDisp">0,0</div>
+        </div>
+
+        <div class="result-box secondary">
+            <div class="label-small">Derde skill</div>
+            <div class="val-medium" id="skillDisp">-</div>
+        </div>
+    </div>
+
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">Scoutscore Formule</div>
+        <p>De score wordt berekend op basis van gewogen factoren:</p>
+        <ul>
+            <li><strong>Leeftijd:</strong> 15 jaar (+2 pnt), 16 jaar (0 pnt).</li>
+            <li><strong>Huidig & Potentieel:</strong> Niveau t.o.v. 'Uitstekend' (8). Telt dubbel mee.</li>
+            <li><strong>Gemiddeld:</strong> Niveau t.o.v. 'Uitstekend' (8). Telt driedubbel mee.</li>
+            <li><strong>Specialiteit:</strong> +1 punt.</li>
+        </ul>
+        <p style="font-size: 0.8em; color: #555;">De derde skill wordt geschat door: <em>(Gemiddeld * 3) - Huidig - Potentieel</em>.</p>
+        <button class="close-btn" onclick="closeModal()">Sluiten</button>
+    </div>
+</div>
+
+<script>
+    const niveaus = [
+        "Onbekend", "Niet-bestaand", "Rampzalig", "Waardeloos", "Slecht", 
+        "Zwak", "Matig", "Redelijk", "Goed", "Uitstekend", "Formidabel", 
+        "Uitmuntend", "Briljant", "Wonderbaarlijk", "Wereldklasse", 
+        "Bovennatuurlijk", "Reusachtig", "Buitenaards", "Mythisch", 
+        "Magisch", "Utopisch", "Goddelijk"
+    ];
+
+    function bereken() {
+        const lft = parseFloat(document.getElementById('leeftijd').value);
+        const hui = parseFloat(document.getElementById('huidig').value);
+        const pot = parseFloat(document.getElementById('potentieel').value);
+        const gem = parseFloat(document.getElementById('gemiddeld').value);
+        const spec = parseFloat(document.getElementById('spec').value);
+
+        const totaal = (lft * 2) + ((hui / 8) * 2) + ((pot / 8) * 2) + ((gem / 8) * 3) + (spec * 1);
+        document.getElementById('scoreDisp').innerText = totaal.toFixed(1).replace('.', ',');
+
+        let indexSkill = Math.round((gem * 3) - hui - pot);
+        let safeIndexSkill = Math.max(0, Math.min(21, indexSkill + 1));
+        document.getElementById('skillDisp').innerText = niveaus[safeIndexSkill];
+
+        let afgerondeScore = Math.round(totaal);
+        let quoteIndex = afgerondeScore + 1;
+        quoteIndex = Math.max(0, Math.min(21, quoteIndex));
+        document.getElementById('emileQuoteWord').innerText = niveaus[quoteIndex].toLowerCase();
+    }
+
+    function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
+    function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+
+document.addEventListener('DOMContentLoaded', bereken);
+</script>
+
+</body>
+</html>

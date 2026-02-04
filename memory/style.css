@@ -11,61 +11,43 @@ body {
     background-color: var(--ht-bg);
     color: var(--ht-text);
     margin: 0;
-    padding: 10px;
+    padding: 10px; /* Kleinere padding op body */
     display: flex;
     justify-content: center;
+    /* Zorgt dat op mobiel de adresbalk niet in de weg zit */
     min-height: 100vh;
+    min-height: -webkit-fill-available;
 }
 
 .app-container {
     width: 100%;
-    /* Iets breder toestaan voor de 6 kolommen op desktop */
     max-width: 800px; 
     background-color: var(--white);
     border-radius: 8px;
+    /* Alleen bovenrand voor stijl, bespaart ruimte rondom */
     border-top: 4px solid var(--ht-green);
-    padding: 20px;
+    padding: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    box-sizing: border-box;
-    margin: 0 auto;
-}
-
-.header { 
-    text-align: center; 
-    margin-bottom: 15px; 
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-}
-
-.logo-container {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 10px;
+    flex-direction: column;
+    height: fit-content;
 }
 
-.ht-logo { width: 120px; height: auto; }
-.pob-logo { width: 50px; height: auto; }
-
-h1 { 
-    color: var(--ht-green); 
-    font-size: 1.2em; 
-    margin: 0; 
-    text-transform: uppercase; 
-    font-weight: bold;
-}
-
-/* --- SCOREBORD --- */
+/* --- SCOREBORD (Compact) --- */
 .score-board {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: #f9f9f9;
-    padding: 10px 15px;
-    border-radius: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
     border-left: 4px solid var(--ht-yellow);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+}
+
+.score-group {
+    display: flex;
+    gap: 15px;
 }
 
 .score-item {
@@ -74,81 +56,81 @@ h1 {
 }
 
 .score-label {
-    font-size: 0.75em;
+    font-size: 0.65em;
     font-weight: bold;
     text-transform: uppercase;
     color: #666;
 }
 
 .score-value {
-    font-size: 1.1em;
+    font-size: 1em;
     font-weight: bold;
     color: var(--ht-green);
 }
 
-.reset-btn {
+.btn-group {
+    display: flex;
+    gap: 8px;
+}
+
+.reset-btn, .icon-btn {
     background-color: var(--ht-green);
     color: white;
     border: none;
-    padding: 8px 12px;
+    width: 36px;
+    height: 36px;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 0.85em;
-    text-transform: uppercase;
+    font-size: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* --- HET ROOSTER (GRID) --- */
+.icon-btn { background-color: var(--ht-yellow); color: #333; }
+
+/* --- GRID --- */
 .game-grid {
     display: grid;
-    /* Desktop standaard: 6 kolommen breed */
+    /* Desktop: 6 kolommen */
     grid-template-columns: repeat(6, 1fr); 
-    gap: 10px;
+    gap: 8px;
     perspective: 1000px;
 }
 
-/* De kaart zelf: Rechthoekig (Portret) */
+/* Mobiele optimalisatie: 4 kolommen ipv 3 */
+@media (max-width: 600px) {
+    .game-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 5px; 
+    }
+}
+
 .card {
     background-color: transparent;
-    /* Verhouding 3 breed, 4 hoog. Perfect voor portretfoto's */
     aspect-ratio: 3 / 4; 
     cursor: pointer;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.4s;
+    transition: transform 0.3s;
+    -webkit-tap-highlight-color: transparent; /* Verwijdert blauwe tik op mobiel */
 }
 
-/* MEDIA QUERY: Speciaal voor mobiele telefoons */
-@media (max-width: 600px) {
-    .game-grid {
-        /* Op mobiel: 3 kolommen breed */
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px; 
-    }
-    
-    .app-container {
-        padding: 10px; 
-    }
-}
-
-/* Draai-effect */
-.card.flipped {
-    transform: rotateY(180deg);
-}
+.card.flipped { transform: rotateY(180deg); }
 
 .card-face {
     position: absolute;
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    border-radius: 6px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-/* Voorkant (Groen met vraagteken) */
 .card-front {
     background-color: var(--ht-green);
     border: 2px solid var(--ht-yellow);
@@ -157,70 +139,117 @@ h1 {
     font-weight: bold;
 }
 
-/* Achterkant (Het plaatje + tekst) */
 .card-back {
     background-color: white; 
-    border: 1px solid #ccc;
     transform: rotateY(180deg);
     overflow: hidden; 
-    padding: 2px;
-    box-sizing: border-box;
-    position: relative; /* Nodig voor de tekst positionering */
 }
 
 .card-back img {
     width: 100%;
     height: 100%;
     object-fit: cover; 
-    border-radius: 4px;
 }
 
-/* --- SPELER INFO OVERLAY --- */
+/* Info op kaartje: kleiner en subtieler */
 .player-info {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    background: rgba(0, 0, 0, 0.75); /* Zwarte balk */
+    background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0));
     color: white;
-    padding: 4px 2px;
+    padding: 15px 2px 2px 2px; /* Extra padding top voor fade effect */
     text-align: center;
-    box-sizing: border-box;
-    border-bottom-left-radius: 4px; 
-    border-bottom-right-radius: 4px;
-}
-
-.player-number {
-    display: block;
-    color: var(--ht-yellow);
-    font-weight: bold;
-    font-size: 0.9em;
-    line-height: 1.2;
+    font-size: 10px; /* Kleinere letters */
 }
 
 .player-name {
     display: block;
-    font-size: 0.75em;
     white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis; /* Puntjes (...) bij lange naam */
-    font-weight: normal;
+    text-overflow: ellipsis;
 }
 
-/* --- WINST BERICHT --- */
-.win-message {
-    text-align: center;
-    margin-top: 20px;
-    padding: 15px;
-    background-color: rgba(61, 124, 59, 0.1);
-    border: 1px solid var(--ht-green);
-    color: var(--ht-green);
-    border-radius: 8px;
+/* --- MODAL (POPUP) --- */
+.modal {
     display: none;
-    animation: popIn 0.5s;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-@keyframes popIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+    font-weight: bold;
+    color: var(--ht-green);
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.highscore-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 15px 0;
+    text-align: left;
+}
+
+.highscore-list li {
+    padding: 8px 0;
+    border-bottom: 1px dotted #eee;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+}
+
+.close-btn, .save-btn, .close-msg-btn {
+    background: var(--ht-green);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* Winst Bericht Overlay aanpassing */
+.win-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    width: 80%;
+    max-width: 300px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border: 2px solid var(--ht-green);
+    z-index: 500;
+}
+
+.input-area input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+    box-sizing: border-box;
 }

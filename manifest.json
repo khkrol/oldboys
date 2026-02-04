@@ -1,0 +1,31 @@
+{
+  "name": "Potter's Football Group",
+  "short_name": "PFG",
+  "description": "De ultieme verzameling spellen en Hattrick tools.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/images/potters.jpg",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/images/potters.jpg",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Carieb Shuffle",
+      "short_name": "Shuffle",
+      "description": "Start direct een potje Carieb Shuffle",
+      "url": "./memory/index.html",
+      "icons": [{ "src": "assets/images/potters.jpg", "sizes": "192x192" }]
+    },
+  ]
+}
