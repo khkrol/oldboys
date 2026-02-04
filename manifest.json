@@ -3,20 +3,23 @@
   "short_name": "PFG",
   "description": "De ultieme verzameling spellen en Hattrick tools.",
   "start_url": "./index.html",
+  "id": "./",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#007bff",
+  "background_color": "#3D7C3B",
+  "theme_color": "#3D7C3B",
   "orientation": "portrait",
   "icons": [
     {
       "src": "assets/images/potters.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     },
     {
       "src": "assets/images/potters.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg",
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
@@ -25,7 +28,11 @@
       "short_name": "Shuffle",
       "description": "Start direct een potje Carieb Shuffle",
       "url": "./memory/index.html",
-      "icons": [{ "src": "assets/images/potters.jpg", "sizes": "192x192" }]
-    },
+      "icons": [{ 
+          "src": "assets/images/potters.jpg", 
+          "sizes": "192x192",
+          "type": "image/jpeg"
+      }]
+    }
   ]
 }

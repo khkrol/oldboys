@@ -218,5 +218,23 @@
         setHeight();
     </script>
 
+<script>
+    // ... je bestaande scripts ...
+
+    // Service Worker Registratie voor PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('sw.js').then(function(registration) {
+                console.log('ServiceWorker registratie succesvol: ', registration.scope);
+            }, function(err) {
+                console.log('ServiceWorker registratie mislukt: ', err);
+            });
+        });
+    }
+</script>
+
+</body>
+
+
 </body>
 </html>
