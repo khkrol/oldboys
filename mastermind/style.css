@@ -1,0 +1,253 @@
+/* =========================================
+   1. VARIABELEN & BASIS
+   ========================================= */
+:root {
+    --pin-1: #d9534f; /* Rood */
+    --pin-2: #3D7C3B; /* Groen (Hattrick) */
+    --pin-3: #FFC200; /* Geel (Hattrick) */
+    --pin-4: #0275d8; /* Blauw */
+    --pin-5: #f0ad4e; /* Oranje */
+    --pin-6: #6f42c1; /* Paars */
+    --hole: #e0e0e0;  /* Leeg gaatje */
+    
+    /* Importeer kleuren uit global scope voor zekerheid */
+    --ht-green: #3D7C3B;
+    --ht-yellow: #FFC200;
+}
+
+/* =========================================
+   2. HEADER / SCOREBORD (Kopie van Memory)
+   ========================================= */
+.score-board {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 4px solid var(--ht-yellow);
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.score-group {
+    display: flex;
+    gap: 15px;
+}
+
+.score-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.score-label {
+    font-size: 0.65em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #666;
+    letter-spacing: 0.5px;
+}
+
+.score-value {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: var(--ht-green);
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+}
+
+.reset-btn, .icon-btn {
+    background-color: var(--ht-green);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.reset-btn:hover, .icon-btn:hover {
+    background-color: #2A5A29;
+}
+
+.icon-btn { 
+    background-color: var(--ht-yellow); 
+    color: #333; 
+}
+.icon-btn:hover {
+    background-color: #e0a800;
+}
+
+/* =========================================
+   3. MASTERMIND SPECIFIEK
+   ========================================= */
+
+.game-board {
+    flex: 1;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    overflow-y: auto;
+    min-height: 300px;
+    max-height: 50vh;
+    border: 1px solid #ddd;
+    display: flex;
+    flex-direction: column; 
+}
+
+.board-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.guess-slots {
+    flex: 3;
+    display: flex;
+    justify-content: space-around;
+}
+
+.feedback-slots {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    background: rgba(0,0,0,0.05);
+    padding: 4px;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.small-pin {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ddd; 
+}
+.small-pin.exact { background-color: #000; } 
+.small-pin.color { background-color: #fff; border: 1px solid #999; } 
+
+.controls-area {
+    border-top: 2px solid var(--ht-green);
+    padding-top: 15px;
+    background: white;
+}
+
+.current-guess-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+/* --- AANGEPAST: Centreren van tekst in pinnen --- */
+.pin-socket, .pin, .color-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 13px; /* Standaard lettergrootte */
+    color: white;    /* Standaard tekstkleur */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4); /* Betere leesbaarheid */
+}
+
+.pin-socket {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: var(--hole);
+    border: 2px solid inset rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.pin-socket:active { transform: scale(0.95); }
+
+.color-picker {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.color-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.color-btn:hover { transform: scale(1.1); }
+
+/* --- AANGEPAST: Kleuren en Letters --- */
+.c-1 { background-color: var(--pin-1); }
+.c-2 { background-color: var(--pin-2); }
+.c-3 { background-color: var(--pin-3); }
+.c-4 { background-color: var(--pin-4); }
+.c-5 { background-color: var(--pin-5); }
+.c-6 { background-color: var(--pin-6); }
+
+/* De letters toevoegen via CSS */
+.c-1::after { content: "K"; }   /* Rood */
+.c-2::after { content: "CV"; }  /* Groen */
+
+/* Geel (VLV) heeft donkere tekst nodig en iets kleiner font */
+.c-3::after { 
+    content: "VLV"; 
+    color: #333; 
+    text-shadow: none; 
+    font-size: 10px; 
+} 
+
+.c-4::after { content: "CM"; }  /* Blauw */
+.c-5::after { content: "A"; }   /* Oranje */
+.c-6::after { content: "VL"; }  /* Paars */
+
+.pin {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.2);
+}
+
+.check-btn {
+    background-color: var(--ht-green);
+    color: white;
+    border: none;
+    padding: 0 20px;
+    height: 36px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+.check-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.hidden { display: none !important; }

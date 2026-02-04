@@ -101,6 +101,17 @@
             border-left: 4px solid var(--ht-yellow);
         }
 
+        .nav-category {
+            padding: 20px 20px 5px 20px; /* Iets meer ruimte aan de bovenkant */
+            font-size: 0.75em;
+            text-transform: uppercase;
+            color: var(--ht-yellow);
+            font-weight: bold;
+            opacity: 0.6; /* Subtieler dan de hoofdtekst */
+            letter-spacing: 1px;
+            pointer-events: none; /* Niet klikbaar */
+        }
+
         /* Content Area */
         main {
             flex: 1;
@@ -167,8 +178,8 @@
             <div class="sub">Bestuurskamer</div>
         </div>
 
-        <div class="menu-grid">
-            <a class="nav-item" onclick="loadPage('tools/kantine.html', this)">Kantine</a>
+<div class="menu-grid">
+            <div class="nav-category">Tools</div> <a class="nav-item" onclick="loadPage('tools/kantine.html', this)">Kantine</a>
             <a class="nav-item" onclick="loadPage('tools/vrouwfatu.html', this)">Vrouw Fatu</a>
             <a class="nav-item" onclick="loadPage('tools/injury.html', this)">Dokter Ümit</a>
             <a class="nav-item" onclick="loadPage('tools/keeper.html', this)">Keeperscout</a>
@@ -176,7 +187,12 @@
             <a class="nav-item" onclick="loadPage('tools/counterhulp.html', this)">Counter-assistent</a>
             <a class="nav-item" onclick="loadPage('tools/mandekking.html', this)">Mandekking-assistent</a>
             <a class="nav-item" onclick="loadPage('tools/stadion.html', this)">Stadion-assistent</a>
+
+            <div class="nav-category">Minigames</div>
+            
             <a class="nav-item" onclick="loadPage('memory/index.html', this)">Carieb Shuffle</a>
+            <a class="nav-item" onclick="loadPage('mastermind/index.html', this)">Mastermind</a>
+            <a class="nav-item" onclick="loadPage('runcoffeyrun/index.html', this)">Run Coffey Run</a>
         </div>
     </nav>
 

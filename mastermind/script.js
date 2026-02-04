@@ -1,0 +1,285 @@
+// --- FIREBASE CONFIGURATIE ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
+  authDomain: "oldboys-c58f9.firebaseapp.com",
+  projectId: "oldboys-c58f9",
+  storageBucket: "oldboys-c58f9.firebasestorage.app",
+  messagingSenderId: "23329894436",
+  appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// --- SPEL CONFIGURATIE ---
+const COLORS = [1, 2, 3, 4, 5, 6]; 
+const MAX_TURNS = 10;
+const CODE_LENGTH = 4;
+
+// Status Variabelen
+let secretCode = [];
+let currentGuess = [];
+let turn = 1;
+let gameOver = false;
+
+// HTML Elementen
+const gameBoard = document.getElementById('game-board');
+const turnDisplay = document.getElementById('turn-display');
+const checkBtn = document.getElementById('check-btn');
+const msgOverlay = document.getElementById('message-overlay');
+const msgTitle = document.getElementById('msg-title');
+const msgText = document.getElementById('msg-text');
+const secretReveal = document.getElementById('secret-reveal');
+const saveScoreArea = document.getElementById('save-score-area');
+const nameInput = document.getElementById('playerName');
+const highScoreList = document.getElementById('highScoreList');
+
+// Initieer het spel
+document.addEventListener('DOMContentLoaded', initGame);
+
+function initGame() {
+    secretCode = [];
+    currentGuess = [];
+    turn = 1;
+    gameOver = false;
+    
+    gameBoard.innerHTML = '';
+    updateTurnDisplay();
+    renderCurrentGuess();
+    
+    msgOverlay.classList.add('hidden');
+    if(nameInput) nameInput.value = '';
+    
+    // Laad alvast scores op de achtergrond
+    loadLeaderboard();
+    
+    // Genereer Code
+    for (let i = 0; i < CODE_LENGTH; i++) {
+        const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+        secretCode.push(randomColor);
+    }
+    console.log("Dev Info - Code:", secretCode);
+}
+
+function selectColor(colorIndex) {
+    if (gameOver) return;
+    if (currentGuess.length < CODE_LENGTH) {
+        currentGuess.push(colorIndex);
+        renderCurrentGuess();
+    }
+}
+
+function removeColor(index) {
+    if (gameOver) return;
+    if (index < currentGuess.length) {
+        currentGuess.splice(index, 1);
+        renderCurrentGuess();
+    }
+}
+
+function renderCurrentGuess() {
+    for (let i = 0; i < CODE_LENGTH; i++) {
+        const socket = document.getElementById(`guess-${i}`);
+        socket.className = 'pin-socket'; 
+        socket.innerHTML = '';
+        if (currentGuess[i]) {
+            socket.classList.add(`c-${currentGuess[i]}`);
+        }
+    }
+    checkBtn.disabled = (currentGuess.length !== CODE_LENGTH);
+}
+
+function submitGuess() {
+    if (currentGuess.length !== CODE_LENGTH) return;
+
+    const result = calculateResult(currentGuess, secretCode);
+    addTurnToBoard(currentGuess, result);
+
+    if (result.exact === CODE_LENGTH) {
+        endGame(true);
+    } else if (turn >= MAX_TURNS) {
+        endGame(false);
+    } else {
+        turn++;
+        currentGuess = [];
+        updateTurnDisplay();
+        renderCurrentGuess();
+        gameBoard.scrollTop = gameBoard.scrollHeight;
+    }
+}
+
+function calculateResult(guess, code) {
+    let exact = 0;
+    let colorOnly = 0;
+    let checkCode = [...code];
+    let checkGuess = [...guess];
+
+    // Check Exact (Zwart)
+    for (let i = 0; i < CODE_LENGTH; i++) {
+        if (checkGuess[i] === checkCode[i]) {
+            exact++;
+            checkCode[i] = null; 
+            checkGuess[i] = null; 
+        }
+    }
+
+    // Check Kleur (Wit)
+    for (let i = 0; i < CODE_LENGTH; i++) {
+        if (checkGuess[i] !== null) {
+            const foundIndex = checkCode.indexOf(checkGuess[i]);
+            if (foundIndex !== -1) {
+                colorOnly++;
+                checkCode[foundIndex] = null; 
+            }
+        }
+    }
+    return { exact, colorOnly };
+}
+
+function addTurnToBoard(guessArr, result) {
+    const row = document.createElement('div');
+    row.classList.add('board-row');
+
+    let pinsHtml = '<div class="guess-slots">';
+    guessArr.forEach(color => {
+        pinsHtml += `<div class="pin c-${color}"></div>`;
+    });
+    pinsHtml += '</div>';
+
+    let feedbackHtml = '<div class="feedback-slots">';
+    for(let i=0; i<result.exact; i++) feedbackHtml += '<div class="small-pin exact"></div>';
+    for(let i=0; i<result.colorOnly; i++) feedbackHtml += '<div class="small-pin color"></div>';
+    const remaining = 4 - (result.exact + result.colorOnly);
+    for(let i=0; i<remaining; i++) feedbackHtml += '<div class="small-pin"></div>';
+    feedbackHtml += '</div>';
+
+    row.innerHTML = pinsHtml + feedbackHtml;
+    gameBoard.appendChild(row);
+}
+
+function updateTurnDisplay() {
+    turnDisplay.innerText = `${turn}/${MAX_TURNS}`;
+}
+
+function endGame(won) {
+    gameOver = true;
+    msgOverlay.classList.remove('hidden');
+    
+    // Toon de code
+    secretReveal.innerHTML = '';
+    secretCode.forEach(color => {
+        const pin = document.createElement('div');
+        pin.className = `pin c-${color}`;
+        pin.style.margin = '0 5px';
+        secretReveal.appendChild(pin);
+    });
+
+    if (won) {
+        msgTitle.innerText = "GEWONNEN!";
+        msgTitle.style.color = "var(--ht-green)";
+        msgText.innerText = `Je hebt de code gekraakt in ${turn} beurten.`;
+        saveScoreArea.classList.remove('hidden'); // Toon invoerveld
+    } else {
+        msgTitle.innerText = "GAME OVER";
+        msgTitle.style.color = "var(--red-alert)";
+        msgText.innerText = "Helaas, je beurten zijn op.";
+        saveScoreArea.classList.add('hidden'); // Verberg invoerveld
+    }
+}
+
+// --- FIREBASE FUNCTIES (AANGEPAST) ---
+
+function saveScore() {
+    const name = nameInput.value.trim() || "Anoniem";
+    const score = turn; // Minder beurten is beter
+    const now = Date.now(); 
+
+    // We gebruiken een aparte collectie voor mastermind
+    db.collection("mastermind_scores").add({
+        name: name,
+        score: score,
+        date: now
+    })
+    .then(() => {
+        alert("Score opgeslagen!");
+        msgOverlay.classList.add('hidden'); 
+        openLeaderboard(); 
+    })
+    .catch((error) => {
+        console.error("Fout bij opslaan: ", error);
+        alert("Kon niet verbinden met de database.");
+    });
+}
+
+function loadLeaderboard() {
+    // AANGEPAST: Laad scores van afgelopen 7 dagen
+    const now = Date.now();
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; 
+    const timeAgo = now - sevenDaysInMs;
+
+    db.collection("mastermind_scores")
+        .where("date", ">", timeAgo)
+        .orderBy("date") // Firebase filter vereiste
+        .get()
+        .then((querySnapshot) => {
+            let scores = [];
+            querySnapshot.forEach((doc) => {
+                scores.push(doc.data());
+            });
+
+            // Sorteer: Laagste score (minste beurten) eerst
+            scores.sort((a, b) => a.score - b.score);
+            
+            // AANGEPAST: Top 10 in plaats van Top 3
+            const top10 = scores.slice(0, 10);
+            updateLeaderboardUI(top10);
+        })
+        .catch((error) => {
+            console.log("Error loading scores:", error);
+            highScoreList.innerHTML = '<li><span>Laden...</span></li>';
+        });
+}
+
+function updateLeaderboardUI(topList) {
+    highScoreList.innerHTML = '';
+    
+    if (topList.length === 0) {
+        highScoreList.innerHTML = '<li><span>Nog geen scores deze week!</span></li>';
+        return;
+    }
+
+    topList.forEach((item, index) => {
+        const li = document.createElement('li');
+        
+        // Datum formateren (Dag-Maand Tijd)
+        const dateObj = new Date(item.date);
+        const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
+        const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+        
+        li.innerHTML = `
+            <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${index + 1}</span>
+            <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
+                <span style="font-weight:bold;">${item.name}</span>
+                <span style="font-size:0.75em; color:#888;">${dateStr} ${timeStr}</span>
+            </div>
+            <span style="font-weight:bold">${item.score}</span>
+        `;
+        highScoreList.appendChild(li);
+    });
+}
+
+function openLeaderboard() {
+    document.getElementById('leaderboardModal').style.display = 'flex';
+    loadLeaderboard();
+}
+
+function closeLeaderboard() {
+    document.getElementById('leaderboardModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('leaderboardModal');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
