@@ -6,186 +6,73 @@
     <title>Run Coffey Run - Hattrick Arcade</title>
     
     <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/game.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-    <style>
-        /* Specifieke stijlen voor Run Coffey Run die niet in global.css staan */
-        body {
-            overflow: hidden; /* Voorkom scrollen tijdens het spelen */
-            touch-action: none;
-        }
-
-        .game-wrapper {
-            position: relative;
-            width: 100%;
-            height: 300px;
-            background-color: white; /* AANGEPAST: Witte achtergrond voor de lucht */
-            border: 2px solid var(--ht-green);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
-
-        /* De Grasmat / Baan */
-        .track {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 40px;
-            /* AANGEPAST: Groen/Donkergroen patroon */
-            background: repeating-linear-gradient(
-                45deg,
-                var(--ht-green),
-                var(--ht-green) 10px,
-                #2A5A29 10px, /* Een donkerdere tint groen */
-                #2A5A29 20px
-            );
-            border-top: 4px solid white; /* De witte lijn behouden */
-        }
-
-        /* Eloy Coffey Karakter */
-        #coffey {
-            position: absolute;
-            bottom: 40px; /* Bovenop de baan */
-            left: 30px;
-            width: 60px;  
-            height: 90px; 
-            z-index: 10;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end; 
-        }
-
-        /* De afbeelding stijl */
-        #coffey img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; 
-            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)); 
-        }
-
-        /* De Hordes */
-        .obstacle {
-            position: absolute;
-            bottom: 40px;
-            width: 30px;
-            height: 40px;
-            background-color: var(--ht-text);
-            border: 2px solid white;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-        }
-
-        /* Score Display in Game */
-        .live-score {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--ht-green);
-            background: rgba(255,255,255,0.8);
-            padding: 5px 10px;
-            border-radius: 4px;
-            z-index: 20;
-        }
-
-        .start-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-            text-align: center;
-        }
-        
-        .menu-bar {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .highscore-list {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 15px 0;
-            text-align: left;
-        }
-
-        .highscore-list li {
-            padding: 8px 0;
-            border-bottom: 1px dotted #eee;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-        }
-    </style>
 </head>
 <body>
 
 <div class="app-container">
-    
-    <div class="header">
-        <h1>Run Coffey Run</h1>
-        <div style="font-size: 0.8em; color: #666;">Help Eloy over de hordes!</div>
-    </div>
 
-    <div class="menu-bar">
-        <button class="info-btn" onclick="openLeaderboard()" style="width: auto; padding: 5px 15px; border-radius: 4px;">&#127942; Topscores</button>
-        <div style="font-weight: bold; color: var(--ht-green);">Highscore: <span id="localHighScore">0</span></div>
-    </div>
-
-    <div class="game-wrapper" id="gameArea" onclick="jump()">
-        <div class="live-score" id="scoreDisplay">0</div>
-        
-        <div id="startScreen" class="start-overlay">
-            <h2 style="color: var(--ht-green);">Klaar voor de start?</h2>
-            <p>Spring met [SPATIE] of tik op het scherm.</p>
-            <button class="btn-primary" style="width: 200px;" onclick="startGame(event)">START</button>
-        </div>
-
-        <div id="gameOverScreen" class="start-overlay" style="display: none;">
-            <h2 style="color: var(--red-alert);">Horde geraakt!</h2>
-            <p>Je score: <span id="finalScore" style="font-weight:bold; font-size: 1.2em;">0</span></p>
-            
-            <div class="input-group" style="width: 80%; max-width: 250px;">
-                <input type="text" id="playerName" placeholder="Manager Naam" maxlength="15">
-                <button class="btn-primary" onclick="saveScore()">Opslaan & Opnieuw</button>
-                <button class="close-btn" style="margin-top:5px; background: #999;" onclick="resetGame()">Alleen Opnieuw</button>
+    <div class="score-board">
+        <div class="score-group">
+            <div class="score-item">
+                <span class="score-label">Score</span>
+                <span id="scoreValue" class="score-value">0</span>
             </div>
+            <div class="score-item">
+                <span class="score-label">Highscore</span>
+                <span id="highScoreValue" class="score-value">0</span>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">&#127942;</button>
+            <button class="reset-btn" onclick="resetGame()" title="Reset">&#8635;</button>
+        </div>
+    </div>
+
+    <div class="runner-wrapper" id="gameArea" onclick="handleGameInput()">
+        <div id="startHint" class="start-hint">
+            TAP OM TE STARTEN<br>
+            <span style="font-size:0.7em; font-weight:normal;">Spring over de schildpadden</span>
         </div>
 
         <div id="coffey">
-            <img src="coffey.jpg" alt="Eloy" onerror="this.style.display='none'; this.parentElement.innerText='&#127939;';">
+            <img src="coffey.png" alt="Eloy">
         </div>
         
         <div class="track"></div>
     </div>
 
-    <div class="quote-box">
-        <span class="name-tag">Coach:</span>
-        "Eloy is snel, maar die hordes zijn verraderlijk. Timing is alles op het gras!"
+    <div id="gameOverMsg" class="win-message hidden">
+        <h3>Horde geraakt!</h3>
+        <p>Je eindscore is: <span id="finalScore" style="font-weight:bold; font-size:1.2em;">0</span></p>
+        
+        <div class="input-area">
+            <input type="text" id="playerName" placeholder="Manager Naam" maxlength="15">
+            <button class="save-btn" id="saveButton" onclick="saveScore()">Opslaan</button>
+        </div>
+        <button class="close-msg-btn" style="background:#888;" onclick="resetGame()">Nog een keer</button>
+    </div>
+
+    <div class="coach-quote">
+        <strong style="color:var(--ht-green)">Coach:</strong> "Eloy is snel, maar die schildpadden staan altijd in de weg. Timing is alles!"
+    </div>
+    
+    <div class="footer-image">
+        <img src="schildpad.png" alt="De tegenstander" style="width: 200px; height: auto;">
     </div>
 </div>
 
 <div id="leaderboardModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">
-            <span>&#127942; Snelste Renners</span>
-            <button class="info-btn" onclick="closeLeaderboard()" style="float:right; background:var(--red-alert);">X</button>
-        </div>
+        <div class="modal-header">&#127942; Topscores (7 dagen)</div>
         <ul id="highScoreList" class="highscore-list">
             <li><span>Laden...</span></li>
         </ul>
+        <button class="close-btn" onclick="closeLeaderboard()">Sluiten</button>
     </div>
 </div>
 
@@ -208,31 +95,41 @@
     // --- GAME VARIABELEN ---
     const coffey = document.getElementById("coffey");
     const gameArea = document.getElementById("gameArea");
-    const scoreDisplay = document.getElementById("scoreDisplay");
-    const startScreen = document.getElementById("startScreen");
-    const gameOverScreen = document.getElementById("gameOverScreen");
+    const scoreDisplay = document.getElementById("scoreValue");
+    const highScoreDisplay = document.getElementById("highScoreValue");
+    const startHint = document.getElementById("startHint");
+    const gameOverMsg = document.getElementById("gameOverMsg");
     const finalScoreSpan = document.getElementById("finalScore");
-    const localHighScoreSpan = document.getElementById("localHighScore");
-    const saveBtn = document.querySelector('#gameOverScreen .btn-primary'); 
+    const saveBtn = document.getElementById('saveButton');
+    const nameInput = document.getElementById('playerName');
+    const highScoreList = document.getElementById('highScoreList');
     
     let isJumping = false;
     let isGameOver = false;
+    let isGameRunning = false;
     let score = 0;
     let gameLoop;
     let obstacleTimer;
     let obstacles = [];
-    let scoreSaved = false; 
+    let scoreSaved = false;
     
     let localHighScore = localStorage.getItem('coffeyHighScore') || 0;
-    localHighScoreSpan.innerText = localHighScore;
+    highScoreDisplay.innerText = localHighScore;
 
-    // --- SPEL BESTURING ---
     document.addEventListener('keydown', function(event) {
         if (event.code === 'Space') {
-            jump();
+            handleGameInput();
             event.preventDefault();
         }
     });
+
+    function handleGameInput() {
+        if (!isGameRunning && !isGameOver) {
+            startGame();
+        } else if (isGameRunning) {
+            jump();
+        }
+    }
 
     function jump() {
         if (isJumping || isGameOver) return;
@@ -240,7 +137,6 @@
         isJumping = true;
         let jumpHeight = 0;
         
-        // Sprong logica
         let upTimer = setInterval(() => {
             if (jumpHeight >= 110) { 
                 clearInterval(upTimer);
@@ -255,29 +151,28 @@
                     coffey.style.bottom = (40 + jumpHeight) + "px";
                 }, 20);
             }
-            
             jumpHeight += 8; 
             coffey.style.bottom = (40 + jumpHeight) + "px";
         }, 20);
     }
 
-    function startGame(e) {
-        if(e) e.stopPropagation();
-        
+    function startGame() {
+        isGameRunning = true;
         isGameOver = false;
         scoreSaved = false; 
-
-        if(saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.innerText = "Opslaan & Opnieuw";
-            saveBtn.style.opacity = "1";
-            saveBtn.style.cursor = "pointer";
-        }
+        
+        startHint.style.display = 'none';
+        
+        // FIX: Gebruik classList.add('hidden') in plaats van style.display='none'
+        gameOverMsg.classList.add('hidden'); 
+        
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Opslaan";
+        saveBtn.style.opacity = "1";
+        saveBtn.style.cursor = "pointer";
 
         score = 0;
         scoreDisplay.innerText = 0;
-        startScreen.style.display = 'none';
-        gameOverScreen.style.display = 'none';
         
         document.querySelectorAll('.obstacle').forEach(e => e.remove());
         obstacles = [];
@@ -288,9 +183,7 @@
 
     function generateObstacles() {
         if (isGameOver) return;
-
         let randomTime = Math.random() * 1500 + 1000;
-        
         obstacleTimer = setTimeout(() => {
             if (!isGameOver) {
                 createObstacle();
@@ -303,6 +196,12 @@
         const obstacle = document.createElement('div');
         obstacle.classList.add('obstacle');
         obstacle.style.left = '100%'; 
+        
+        const img = document.createElement('img');
+        img.src = 'schildpad.png'; 
+        img.alt = 'Schildpad';
+        
+        obstacle.appendChild(img);
         gameArea.appendChild(obstacle);
         obstacles.push(obstacle);
     }
@@ -313,19 +212,16 @@
 
         obstacles.forEach((obstacle, index) => {
             let obstacleLeft = parseInt(window.getComputedStyle(obstacle).getPropertyValue("left"));
-            
             let speed = 5 + (score / 1000); 
             obstacle.style.left = (obstacleLeft - speed) + "px";
 
-            if (obstacleLeft < -40) {
+            if (obstacleLeft < -60) { 
                 obstacle.remove();
                 obstacles.splice(index, 1);
             }
 
-            // Botsing detectie
             let coffeyBottom = parseInt(window.getComputedStyle(coffey).getPropertyValue("bottom"));
-            
-            if (obstacleLeft > 30 && obstacleLeft < 70 && coffeyBottom < 80) {
+            if (obstacleLeft > 20 && obstacleLeft < 80 && coffeyBottom < 80) {
                 gameOver();
             }
         });
@@ -333,44 +229,49 @@
 
     function gameOver() {
         isGameOver = true;
+        isGameRunning = false;
         clearInterval(gameLoop);
         clearTimeout(obstacleTimer);
         
         let finalScore = Math.floor(score / 5);
         finalScoreSpan.innerText = finalScore;
-        gameOverScreen.style.display = 'flex';
+        
+        // FIX: Verwijder de hidden class om de modal te tonen
+        gameOverMsg.classList.remove('hidden');
 
         if (finalScore > localHighScore) {
             localHighScore = finalScore;
             localStorage.setItem('coffeyHighScore', localHighScore);
-            localHighScoreSpan.innerText = localHighScore;
+            highScoreDisplay.innerText = localHighScore;
         }
     }
 
     function resetGame() {
-        startScreen.style.display = 'flex';
-        gameOverScreen.style.display = 'none';
+        isGameOver = false;
+        isGameRunning = false;
+        clearInterval(gameLoop);
+        clearTimeout(obstacleTimer);
+        
+        startHint.style.display = 'block';
+        
+        // FIX: Verberg de modal met de class
+        gameOverMsg.classList.add('hidden');
+        
         score = 0;
         scoreDisplay.innerText = 0;
         document.querySelectorAll('.obstacle').forEach(e => e.remove());
     }
 
-    // --- FIREBASE FUNCTIES ---
     function saveScore() {
         if (scoreSaved) return;
-
-        const nameInput = document.getElementById('playerName');
         const name = nameInput.value.trim() || "Anoniem";
         const finalPoints = Math.floor(score / 5);
         const now = Date.now(); 
 
         scoreSaved = true;
-        if(saveBtn) {
-            saveBtn.disabled = true;
-            saveBtn.innerText = "Bezig met opslaan...";
-            saveBtn.style.opacity = "0.7";
-            saveBtn.style.cursor = "not-allowed";
-        }
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Bezig...";
+        saveBtn.style.opacity = "0.7";
 
         db.collection("coffey_scores").add({
             name: name,
@@ -378,24 +279,20 @@
             date: now
         })
         .then(() => {
-            if(saveBtn) {
-                saveBtn.innerText = "Opgeslagen!";
-            }
+            saveBtn.innerText = "Opgeslagen!";
             setTimeout(() => {
+                // FIX: Verberg modal met class
+                gameOverMsg.classList.add('hidden');
                 openLeaderboard(); 
             }, 500);
         })
         .catch((error) => {
             console.error("Fout bij opslaan: ", error);
             alert("Kon niet verbinden met de database.");
-            
             scoreSaved = false; 
-            if(saveBtn) {
-                saveBtn.disabled = false;
-                saveBtn.innerText = "Probeer opnieuw";
-                saveBtn.style.opacity = "1";
-                saveBtn.style.cursor = "pointer";
-            }
+            saveBtn.disabled = false;
+            saveBtn.innerText = "Probeer opnieuw";
+            saveBtn.style.opacity = "1";
         });
     }
 
@@ -408,44 +305,70 @@
         document.getElementById('leaderboardModal').style.display = 'none';
     }
 
-    function loadLeaderboard() {
-        const highScoreList = document.getElementById('highScoreList');
-        
-        db.collection("coffey_scores")
-            .orderBy("score", "desc") 
-            .limit(10)
-            .get()
-            .then((querySnapshot) => {
-                let html = '';
-                if (querySnapshot.empty) {
-                    html = '<li><span>Nog geen scores!</span></li>';
-                } else {
-                    let rank = 1;
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        html += `
-                            <li>
-                                <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${rank}</span>
-                                <span style="flex:1; margin-left:10px;">${data.name}</span>
-                                <span style="font-weight:bold">${data.score}</span>
-                            </li>
-                        `;
-                        rank++;
-                    });
-                }
-                highScoreList.innerHTML = html;
-            })
-            .catch((error) => {
-                console.log("Error loading scores:", error);
-                highScoreList.innerHTML = '<li><span>Laden mislukt...</span></li>';
-            });
-    }
-
     window.onclick = function(event) {
         const modal = document.getElementById('leaderboardModal');
         if (event.target == modal) {
             closeLeaderboard();
         }
+    }
+
+    function loadLeaderboard() {
+        const now = Date.now();
+        const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+        const weekAgo = now - sevenDaysInMs;
+
+        db.collection("coffey_scores")
+            .where("date", ">", weekAgo)
+            .get()
+            .then((querySnapshot) => {
+                let scores = [];
+                querySnapshot.forEach((doc) => {
+                    scores.push(doc.data());
+                });
+                scores.sort((a, b) => b.score - a.score);
+                const top10 = scores.slice(0, 10);
+                updateLeaderboardUI(top10);
+            })
+            .catch((error) => {
+                console.log("Error loading scores:", error);
+                loadFallbackLeaderboard();
+            });
+    }
+
+    function loadFallbackLeaderboard() {
+        db.collection("coffey_scores")
+            .orderBy("score", "desc")
+            .limit(10)
+            .get()
+            .then((querySnapshot) => {
+                let scores = [];
+                querySnapshot.forEach((doc) => scores.push(doc.data()));
+                updateLeaderboardUI(scores);
+            });
+    }
+
+    function updateLeaderboardUI(topList) {
+        highScoreList.innerHTML = '';
+        if (topList.length === 0) {
+            highScoreList.innerHTML = '<li><span>Nog geen scores deze week</span></li>';
+            return;
+        }
+        topList.forEach((item, index) => {
+            const li = document.createElement('li');
+            const dateObj = new Date(item.date);
+            const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
+            const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+            
+            li.innerHTML = `
+                <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${index + 1}</span>
+                <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
+                    <span style="font-weight:bold;">${item.name}</span>
+                    <span style="font-size:0.75em; color:#888;">${dateStr} ${timeStr}</span>
+                </div>
+                <span style="font-weight:bold">${item.score}</span>
+            `;
+            highScoreList.appendChild(li);
+        });
     }
 </script>
 

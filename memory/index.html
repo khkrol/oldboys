@@ -6,261 +6,11 @@
     <title>Hattrick Memory - Online Topscores</title>
     
     <link rel="icon" href="potters.jpg"> 
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/game.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-    <style>
-        :root {
-            --ht-green: #3D7C3B;
-            --ht-yellow: #FFC200;
-            --ht-bg: #F0F4F0;
-            --ht-text: #333333;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: Verdana, 'Segoe UI', sans-serif;
-            background-color: var(--ht-bg);
-            color: var(--ht-text);
-            margin: 0;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 800px; 
-            background-color: var(--white);
-            border-radius: 8px;
-            border-top: 4px solid var(--ht-green);
-            padding: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            height: fit-content;
-        }
-
-        /* --- SCOREBORD --- */
-        .score-board {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f9f9f9;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border-left: 4px solid var(--ht-yellow);
-            margin-bottom: 10px;
-        }
-
-        .score-group {
-            display: flex;
-            gap: 15px;
-        }
-
-        .score-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .score-label {
-            font-size: 0.65em;
-            font-weight: bold;
-            text-transform: uppercase;
-            color: #666;
-        }
-
-        .score-value {
-            font-size: 1em;
-            font-weight: bold;
-            color: var(--ht-green);
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .reset-btn, .icon-btn {
-            background-color: var(--ht-green);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1.2em;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .icon-btn { background-color: var(--ht-yellow); color: #333; }
-
-        /* --- GRID --- */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); 
-            gap: 8px;
-            perspective: 1000px;
-            min-height: 200px; /* Zorgt dat er altijd ruimte is */
-        }
-
-        @media (max-width: 600px) {
-            .game-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 5px; 
-            }
-        }
-
-        .card {
-            background-color: transparent;
-            aspect-ratio: 3 / 4; 
-            cursor: pointer;
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.3s;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .card.flipped { transform: rotateY(180deg); }
-
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-        }
-
-        .card-front {
-            background-color: var(--ht-green);
-            border: 2px solid var(--ht-yellow);
-            color: var(--ht-yellow);
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-
-        .card-back {
-            background-color: white; 
-            transform: rotateY(180deg);
-            overflow: hidden; 
-        }
-
-        .card-back img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-        }
-
-        .player-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0));
-            color: white;
-            padding: 15px 2px 2px 2px;
-            text-align: center;
-            font-size: 10px;
-        }
-
-        .player-name {
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* --- MODAL --- */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 100%;
-            max-width: 350px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .modal-header {
-            font-weight: bold;
-            color: var(--ht-green);
-            margin-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .highscore-list {
-            list-style: none;
-            padding: 0;
-            margin: 0 0 15px 0;
-            text-align: left;
-        }
-
-        .highscore-list li {
-            padding: 8px 0;
-            border-bottom: 1px dotted #eee;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-        }
-
-        .close-btn, .save-btn, .close-msg-btn {
-            background: var(--ht-green);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        .win-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            width: 80%;
-            max-width: 300px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            border: 2px solid var(--ht-green);
-            z-index: 500;
-        }
-
-        .input-area input {
-            width: 100%;
-            padding: 8px;
-            margin: 10px 0;
-            box-sizing: border-box;
-        }
-    </style>
 </head>
 <body>
 
@@ -286,7 +36,7 @@
 
     <div class="game-grid" id="gameGrid"></div>
 
-    <div id="winMessage" class="win-message" style="display:none;">
+    <div id="winMessage" class="win-message hidden">
         <h3>Gewonnen!</h3>
         <p>Je hebt het gehaald in <span id="finalMoves" style="font-weight:bold">0</span> pogingen.</p>
         
@@ -309,7 +59,6 @@
 </div>
 
 <script>
-    // --- FIREBASE CONFIGURATIE ---
     const firebaseConfig = {
       apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
       authDomain: "oldboys-c58f9.firebaseapp.com",
@@ -322,7 +71,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 12 spelers
     const cardsData = [
         { img: 'images/kaart1.jpg', number: '#1', name: 'Ralph Cicilia' },
         { img: 'images/kaart2.jpg', number: '#2', name: 'Des Millerson' },
@@ -354,7 +102,6 @@
     const highScoreList = document.getElementById('highScoreList');
     const nameInput = document.getElementById('playerName');
 
-    // Zorgt dat het spel start zodra de pagina geladen is
     document.addEventListener('DOMContentLoaded', initGame);
 
     function initGame() {
@@ -367,14 +114,14 @@
         
         movesDisplay.innerText = moves;
         matchesDisplay.innerText = `0/${totalPairs}`;
-        winMsg.style.display = 'none';
+        winMsg.classList.add('hidden');
+        winMsg.style.display = ''; // Reset inline style
+        
         if(nameInput) nameInput.value = '';
         grid.innerHTML = '';
 
-        // Leaderboard laden (alvast op de achtergrond)
         loadLeaderboard();
 
-        // Kaarten dupliceren en schudden
         let tempArray = [];
         cardsData.forEach((item) => {
             tempArray.push({ ...item });
@@ -388,7 +135,6 @@
             card.classList.add('card');
             card.dataset.name = item.name;
 
-            // Opbouw van de kaart HTML
             card.innerHTML = `
                 <div class="card-face card-front">?</div>
                 <div class="card-face card-back">
@@ -464,14 +210,13 @@
 
     function showWinScreen() {
         finalMovesSpan.innerText = moves;
-        winMsg.style.display = 'block';
+        winMsg.classList.remove('hidden');
     }
 
     function resetGame() {
         initGame();
     }
 
-    // --- MODAL FUNCTIES ---
     function openLeaderboard() {
         document.getElementById('leaderboardModal').style.display = 'flex';
         loadLeaderboard(); 
@@ -488,7 +233,6 @@
         }
     }
 
-    // --- FIREBASE FUNCTIES ---
     function saveScore() {
         const name = nameInput.value.trim() || "Anoniem";
         const score = moves;
@@ -501,7 +245,7 @@
         })
         .then(() => {
             alert("Topscore online opgeslagen!");
-            winMsg.style.display = 'none'; 
+            winMsg.classList.add('hidden'); 
             openLeaderboard(); 
         })
         .catch((error) => {
@@ -526,8 +270,6 @@
                 });
 
                 scores.sort((a, b) => a.score - b.score);
-                
-                // TOP 10
                 const top10 = scores.slice(0, 10);
                 updateLeaderboardUI(top10);
             })
@@ -539,15 +281,12 @@
 
     function updateLeaderboardUI(topList) {
         highScoreList.innerHTML = '';
-        
         if (topList.length === 0) {
             highScoreList.innerHTML = '<li><span>Nog geen scores deze week</span></li>';
             return;
         }
-
         topList.forEach((item, index) => {
             const li = document.createElement('li');
-            
             const dateObj = new Date(item.date);
             const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
             const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});

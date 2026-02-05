@@ -3,17 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Onderhoud - A je to!</title>
+    <title>De Kantine - Potter's Old Boys</title>
     
+    <link rel="apple-touch-icon" href="../assets/images/potters.jpg">
+    <link rel="icon" href="../assets/images/potters.jpg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#3D7C3B">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <link rel="stylesheet" href="../css/global.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
-        .maintenance-image {
-            width: 100%;
-            height: auto;
+        /* Specifieke stijlen voor de Kantine */
+        
+        .message-input-area {
+            background: #fff;
+            padding: 15px;
             border-radius: var(--radius);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             margin-bottom: 20px;
-            display: block;
+            border: 1px solid #eee;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-top: 5px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .guestbook-list {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .guestbook-entry {
+            background-color: #f9f9f9;
+            border-left: 4px solid var(--ht-green);
+            padding: 12px;
+            border-radius: 4px;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+
+        .entry-name {
+            font-weight: bold;
+            color: var(--ht-green);
+        }
+
+        .entry-date {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .entry-text {
+            color: var(--ht-text);
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        /* Loading spinner */
+        .loading-msg {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -21,17 +96,174 @@
 
 <div class="app-container">
     <div class="header">
-        <h1>Pagina in Onderhoud</h1>
+        <div class="logo-container">
+            <img src="../assets/images/logo.png" alt="Hattrick Logo" class="ht-logo">
+            <img src="../assets/images/potters.jpg" alt="Potter's Old Boys Logo" class="pob-logo">
+        </div>
+        <h1>De Kantine</h1>
     </div>
 
-    <img src="images/buurman.jpg" alt="Buurman aan het klussen" class="maintenance-image">
-
-    <div class="quote-box">
-        <span class="text-bold text-center" style="color:var(--ht-green); display:block; font-size:1.2em; margin-bottom:10px;">A je to!</span>
-        "Er wordt hier nog even hard getimmerd en gezaagd. Buurman dacht dat hij de code wel even kon repareren met een hamer en wat ducttape.<br><br>
-        We zijn (hopelijk) snel weer terug!"
+    <div class="character-display">
+        <img src="images/daniel.jpg" alt="Barman Daniël" class="character-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box">
+                <div>
+                    <span class="name-tag">Barman Daniël:</span>
+                </div>
+                "Welkom aan de toog! De verhalen zijn hier sterker dan de koffie, maar gelukkig is het bier koud."
+            </div>
+        </div>
     </div>
+
+    <div class="message-input-area">
+        <div class="input-group" style="margin-top:0;">
+            <label>Jouw naam</label>
+            <input type="text" id="guestName" placeholder="Manager naam" maxlength="20">
+        </div>
+        
+        <div class="input-group">
+            <label>Bericht voor de club</label>
+            <textarea id="guestMessage" placeholder="Sterk verhaal of een rondje voor de zaak?" maxlength="140"></textarea>
+        </div>
+
+        <button class="btn-primary" onclick="postMessage()">🍺 Plaats Bericht</button>
+    </div>
+
+    <div class="section-title" style="text-align:center; font-weight:bold; color:#666; margin-top:10px;">
+        Laatste krabbels
+    </div>
+    
+    <div id="guestbookList" class="guestbook-list">
+        <div class="loading-msg">Even de tap doorspoelen... (laden)</div>
+    </div>
+
 </div>
+
+<script>
+    // --- FIREBASE CONFIGURATIE (Overgenomen uit index.html) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
+      authDomain: "oldboys-c58f9.firebaseapp.com",
+      projectId: "oldboys-c58f9",
+      storageBucket: "oldboys-c58f9.firebasestorage.app",
+      messagingSenderId: "23329894436",
+      appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
+    };
+
+    // Initialiseer Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const collectionName = "guestbook"; // Nieuwe collectie voor de kantine
+
+    // --- FUNCTIES ---
+
+    function postMessage() {
+        const nameInput = document.getElementById('guestName');
+        const msgInput = document.getElementById('guestMessage');
+        
+        const name = nameInput.value.trim();
+        const message = msgInput.value.trim();
+
+        if (!name || !message) {
+            alert("Hé, je moet wel wat zeggen én je naam invullen!");
+            return;
+        }
+
+        // Knop tijdelijk uitschakelen om dubbele posts te voorkomen
+        const btn = document.querySelector('.btn-primary');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "Bezig...";
+
+        db.collection(collectionName).add({
+            name: name,
+            message: message,
+            timestamp: Date.now()
+        })
+        .then(() => {
+            // Reset velden
+            msgInput.value = '';
+            // Herlaad berichten
+            loadMessages();
+            // Reset knop
+            btn.disabled = false;
+            btn.innerText = originalText;
+        })
+        .catch((error) => {
+            console.error("Fout bij plaatsen:", error);
+            alert("Kon het bericht niet op het bord prikken. Probeer het later.");
+            btn.disabled = false;
+            btn.innerText = originalText;
+        });
+    }
+
+    function loadMessages() {
+        const list = document.getElementById('guestbookList');
+        
+        db.collection(collectionName)
+            .orderBy("timestamp", "desc")
+            .limit(20) // Haal max 20 berichten op om data te besparen
+            .get()
+            .then((querySnapshot) => {
+                list.innerHTML = ''; // Maak lijst leeg
+
+                if (querySnapshot.empty) {
+                    list.innerHTML = '<div class="loading-msg">Nog geen berichten. Wees de eerste!</div>';
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    addMessageToUI(data);
+                });
+            })
+            .catch((error) => {
+                console.log("Error loading messages:", error);
+                list.innerHTML = '<div class="loading-msg">Fout bij laden. Is de tap stuk?</div>';
+            });
+    }
+
+    function addMessageToUI(data) {
+        const list = document.getElementById('guestbookList');
+        
+        // Datum formatteren
+        const dateObj = new Date(data.timestamp);
+        const dateStr = dateObj.toLocaleDateString('nl-NL', {day: 'numeric', month: 'short'});
+        const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+
+        const entry = document.createElement('div');
+        entry.className = 'guestbook-entry';
+        
+        // Veilige HTML invoegen om scripts te voorkomen (basic sanitization)
+        const safeName = escapeHtml(data.name);
+        const safeMsg = escapeHtml(data.message);
+
+        entry.innerHTML = `
+            <div class="entry-header">
+                <span class="entry-name">${safeName}</span>
+                <span class="entry-date">${dateStr} - ${timeStr}</span>
+            </div>
+            <div class="entry-text">"${safeMsg}"</div>
+        `;
+
+        list.appendChild(entry);
+    }
+
+    // Hulpfunctie om HTML tags onschadelijk te maken (veiligheid)
+    function escapeHtml(text) {
+        if (!text) return text;
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    // Laad berichten zodra de pagina klaar is
+    document.addEventListener('DOMContentLoaded', loadMessages);
+
+</script>
 
 </body>
 </html>

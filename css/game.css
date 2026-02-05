@@ -1,0 +1,183 @@
+/* =========================================
+   1. ALGEMENE GAME STIJLEN & VARIABELEN
+   ========================================= */
+:root {
+    /* Mastermind Kleuren */
+    --pin-1: #d9534f; --pin-2: #3D7C3B; --pin-3: #FFC200;
+    --pin-4: #0275d8; --pin-5: #f0ad4e; --pin-6: #6f42c1;
+    --hole: #e0e0e0;
+}
+
+body {
+    overflow-x: hidden;
+    touch-action: manipulation;
+}
+
+/* --- SCOREBORD --- */
+.score-board {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 4px solid var(--ht-yellow);
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.score-group { display: flex; gap: 15px; }
+.score-item { display: flex; flex-direction: column; }
+.score-label { font-size: 0.65em; font-weight: bold; text-transform: uppercase; color: #666; }
+.score-value { font-size: 1em; font-weight: bold; color: var(--ht-green); }
+.score-value.large { font-size: 1.1em; }
+
+.btn-group { display: flex; gap: 8px; }
+.reset-btn, .icon-btn {
+    background-color: var(--ht-green); color: white; border: none;
+    width: 36px; height: 36px; border-radius: 4px; cursor: pointer;
+    font-weight: bold; font-size: 1.2em; display: flex;
+    justify-content: center; align-items: center; transition: background 0.2s;
+}
+.icon-btn { background-color: var(--ht-yellow); color: #333; }
+.icon-btn:hover { background-color: #e0a800; }
+
+/* --- UNIFORME OVERLAYS (NIEUW) --- */
+.game-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.96);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100; /* Boven alles */
+    text-align: center;
+    padding: 20px;
+    border-radius: var(--radius);
+}
+
+.game-overlay.hidden { display: none !important; }
+
+.overlay-title {
+    color: var(--ht-green);
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.overlay-text {
+    color: #555;
+    font-size: 1em;
+    margin-bottom: 25px;
+    max-width: 300px;
+    line-height: 1.4;
+}
+
+.big-start-btn {
+    background-color: var(--ht-green);
+    color: white;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.3em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(61, 124, 59, 0.3);
+    transition: transform 0.2s;
+    animation: pulse 2s infinite;
+}
+.big-start-btn:hover { transform: scale(1.05); }
+
+.input-area { width: 100%; max-width: 250px; margin: 10px 0; }
+.input-area input {
+    width: 100%; padding: 12px; border: 2px solid #ddd;
+    border-radius: 4px; text-align: center; font-size: 1.1em;
+}
+
+.overlay-btn-group { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 250px; }
+
+/* --- BUTTONS & MODALS --- */
+.save-btn, .close-msg-btn, .check-btn, .close-btn {
+    background: var(--ht-green); color: white; border: none;
+    padding: 12px; border-radius: 4px; cursor: pointer;
+    font-weight: bold; text-transform: uppercase; width: 100%;
+}
+.close-msg-btn { background: #888; }
+.check-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+
+/* Leaderboard Modal specifiek */
+.modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+    width: 100%; height: 100%; background-color: rgba(0,0,0,0.6);
+    justify-content: center; align-items: center; padding: 20px;
+}
+.modal-content {
+    background-color: white; padding: 20px; border-radius: 8px;
+    width: 100%; max-width: 350px; text-align: center;
+}
+.highscore-list { list-style: none; padding: 0; margin: 0 0 15px 0; text-align: left; }
+.highscore-list li {
+    padding: 8px 0; border-bottom: 1px dotted #eee;
+    display: flex; justify-content: space-between; font-size: 0.85em;
+}
+
+/* --- ANIMATIES --- */
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+.hidden { display: none; }
+
+/* --- GAME SPECIFIEK --- */
+/* RUNNER */
+.runner-wrapper {
+    position: relative; width: 100%; height: 300px;
+    background-color: white; border: 2px solid var(--ht-green);
+    border-radius: 4px; overflow: hidden; margin-bottom: 5px; cursor: pointer;
+}
+.track {
+    position: absolute; bottom: 0; width: 100%; height: 40px;
+    background: repeating-linear-gradient(45deg, var(--ht-green), var(--ht-green) 10px, #2A5A29 10px, #2A5A29 20px);
+    border-top: 4px solid white; 
+}
+#coffey { position: absolute; bottom: 40px; left: 30px; width: 60px; height: 90px; z-index: 10; }
+#coffey img, .obstacle img { width: 100%; height: 100%; object-fit: contain; }
+.obstacle { position: absolute; bottom: 40px; width: 60px; height: 45px; z-index: 15; }
+
+/* PUZZLE */
+.puzzle-wrapper {
+    position: relative; width: 100%; min-height: 300px;
+    background-color: white; border: 2px solid var(--ht-green);
+    border-radius: 4px; overflow: hidden; margin-bottom: 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+}
+.puzzle-word { font-size: 2em; font-weight: bold; color: var(--ht-green); margin-bottom: 20px; letter-spacing: 3px; }
+.puzzle-input { width: 80%; padding: 12px; font-size: 1.2em; text-align: center; border: 2px solid #ccc; border-radius: 5px; margin-bottom: 15px; }
+.puzzle-input.wrong { border-color: var(--red-alert); background-color: #fff0f0; }
+.puzzle-input.correct { border-color: var(--ht-green); background-color: #f0fff4; }
+
+/* MEMORY */
+.game-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; perspective: 1000px; min-height: 200px; }
+.card { aspect-ratio: 3/4; cursor: pointer; position: relative; transform-style: preserve-3d; transition: transform 0.3s; }
+.card.flipped { transform: rotateY(180deg); }
+.card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+.card-front { background: var(--ht-green); border: 2px solid var(--ht-yellow); color: var(--ht-yellow); font-size: 1.5em; }
+.card-back { background: white; transform: rotateY(180deg); }
+.card-back img { width: 100%; height: 100%; object-fit: cover; }
+.player-info { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); color: white; font-size: 9px; text-align: center; }
+
+/* MASTERMIND */
+.game-board-mastermind { flex: 1; background: #f9f9f9; border-radius: 8px; padding: 10px; margin-bottom: 15px; min-height: 300px; overflow-y: auto; border: 1px solid #ddd; }
+.board-row { display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+.guess-slots { flex: 3; display: flex; justify-content: space-around; }
+.feedback-slots { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; }
+.small-pin { width: 10px; height: 10px; border-radius: 50%; background: #ddd; }
+.small-pin.exact { background: #000; } .small-pin.color { background: #fff; border: 1px solid #999; }
+.controls-area { border-top: 2px solid var(--ht-green); padding-top: 15px; background: white; }
+.current-guess-row { display: flex; justify-content: space-between; margin-bottom: 15px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
+.pin-socket, .color-btn { width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; font-weight: bold; font-size: 11px; }
+.pin-socket { background: var(--hole); border: 2px solid inset rgba(0,0,0,0.1); }
+.color-picker { display: flex; justify-content: space-between; gap: 5px; }
+.c-1 { background: var(--pin-1); } .c-2 { background: var(--pin-2); } .c-3 { background: var(--pin-3); }
+.c-4 { background: var(--pin-4); } .c-5 { background: var(--pin-5); } .c-6 { background: var(--pin-6); }
+.c-1::after{content:"K";} .c-2::after{content:"CV";} .c-3::after{content:"VLV";font-size:8px;color:#333;}
+.c-4::after{content:"CM";} .c-5::after{content:"A";} .c-6::after{content:"VL";}
