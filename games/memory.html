@@ -8,9 +8,13 @@
     <link rel="icon" href="potters.jpg"> 
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/game.css">
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="../js/effects.js"></script>   
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>    
+    <script src="../js/leaderboard-manager.js"></script>
 </head>
 <body>
 
@@ -59,18 +63,6 @@
 </div>
 
 <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
-      authDomain: "oldboys-c58f9.firebaseapp.com",
-      projectId: "oldboys-c58f9",
-      storageBucket: "oldboys-c58f9.firebasestorage.app",
-      messagingSenderId: "23329894436",
-      appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
     const cardsData = [
         { img: 'images/kaart1.jpg', number: '#1', name: 'Ralph Cicilia' },
         { img: 'images/kaart2.jpg', number: '#2', name: 'Des Millerson' },
@@ -102,7 +94,29 @@
     const highScoreList = document.getElementById('highScoreList');
     const nameInput = document.getElementById('playerName');
 
-    document.addEventListener('DOMContentLoaded', initGame);
+    document.addEventListener('DOMContentLoaded', () => {
+        // OPTIMALISATIE 4: Preload alle afbeeldingen
+        preloadImages();
+        initGame();
+    });
+
+    // OPTIMALISATIE 4: Functie om images te cachen
+    function preloadImages() {
+        cardsData.forEach(card => {
+            const img = new Image();
+            img.src = card.img;
+        });
+    }
+
+    // OPTIMALISATIE 3: Fisher-Yates Shuffle Algoritme
+    // Dit zorgt voor een veel eerlijkere verdeling dan Math.random() - 0.5
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
 
     function initGame() {
         moves = 0;
@@ -115,20 +129,22 @@
         movesDisplay.innerText = moves;
         matchesDisplay.innerText = `0/${totalPairs}`;
         winMsg.classList.add('hidden');
-        winMsg.style.display = ''; // Reset inline style
+        winMsg.style.display = ''; 
         
         if(nameInput) nameInput.value = '';
         grid.innerHTML = '';
 
         loadLeaderboard();
 
+        // Maak paren
         let tempArray = [];
         cardsData.forEach((item) => {
             tempArray.push({ ...item });
             tempArray.push({ ...item });
         });
         
-        cardsArray = tempArray.sort(() => 0.5 - Math.random());
+        // Gebruik de nieuwe shuffle
+        cardsArray = shuffleArray(tempArray);
 
         cardsArray.forEach((item) => {
             const card = document.createElement('div');
@@ -211,6 +227,7 @@
     function showWinScreen() {
         finalMovesSpan.innerText = moves;
         winMsg.classList.remove('hidden');
+	HattrickFX.win();
     }
 
     function resetGame() {
@@ -236,71 +253,16 @@
     function saveScore() {
         const name = nameInput.value.trim() || "Anoniem";
         const score = moves;
-        const now = Date.now(); 
 
-        db.collection("scores").add({
-            name: name,
-            score: score,
-            date: now
-        })
-        .then(() => {
+        LeaderboardManager.saveScore("scores", name, score, () => {
             alert("Topscore online opgeslagen!");
             winMsg.classList.add('hidden'); 
             openLeaderboard(); 
-        })
-        .catch((error) => {
-            console.error("Fout bij opslaan: ", error);
-            alert("Kon niet verbinden met de database.");
         });
     }
 
     function loadLeaderboard() {
-        const now = Date.now();
-        const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-        const weekAgo = now - sevenDaysInMs;
-
-        db.collection("scores")
-            .where("date", ">", weekAgo)
-            .orderBy("date") 
-            .get()
-            .then((querySnapshot) => {
-                let scores = [];
-                querySnapshot.forEach((doc) => {
-                    scores.push(doc.data());
-                });
-
-                scores.sort((a, b) => a.score - b.score);
-                const top10 = scores.slice(0, 10);
-                updateLeaderboardUI(top10);
-            })
-            .catch((error) => {
-                console.log("Error loading scores:", error);
-                highScoreList.innerHTML = '<li><span>Laden mislukt. Check je internet.</span></li>';
-            });
-    }
-
-    function updateLeaderboardUI(topList) {
-        highScoreList.innerHTML = '';
-        if (topList.length === 0) {
-            highScoreList.innerHTML = '<li><span>Nog geen scores deze week</span></li>';
-            return;
-        }
-        topList.forEach((item, index) => {
-            const li = document.createElement('li');
-            const dateObj = new Date(item.date);
-            const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
-            const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
-            
-            li.innerHTML = `
-                <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${index + 1}</span>
-                <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
-                    <span style="font-weight:bold;">${item.name}</span>
-                    <span style="font-size:0.75em; color:#888;">${dateStr} ${timeStr}</span>
-                </div>
-                <span style="font-weight:bold">${item.score}</span>
-            `;
-            highScoreList.appendChild(li);
-        });
+        LeaderboardManager.loadTop10("scores", "highScoreList", "asc");
     }
 </script>
 </body>

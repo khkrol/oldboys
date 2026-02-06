@@ -7,9 +7,13 @@
     
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/game.css">
-    
+ 
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="../js/effects.js"></script>   
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="../js/leaderboard-manager.js"></script>
 </head>
 <body>
 
@@ -77,19 +81,6 @@
 </div>
 
 <script>
-// --- FIREBASE CONFIGURATIE ---
-const firebaseConfig = {
-  apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
-  authDomain: "oldboys-c58f9.firebaseapp.com",
-  projectId: "oldboys-c58f9",
-  storageBucket: "oldboys-c58f9.firebasestorage.app",
-  messagingSenderId: "23329894436",
-  appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 // --- SPEL CONFIGURATIE ---
 const COLORS = [1, 2, 3, 4, 5, 6]; 
 const MAX_TURNS = 10;
@@ -254,7 +245,8 @@ function endGame(won) {
     });
 
     if (won) {
-        msgTitle.innerText = "GEWONNEN!";
+        HattrickFX.win();
+                   msgTitle.innerText = "GEWONNEN!";
         msgTitle.style.color = "var(--ht-green)";
         msgText.innerText = `Je hebt de code gekraakt in ${turn} beurten.`;
         saveScoreArea.classList.remove('hidden'); // Toon invoerveld
@@ -266,85 +258,24 @@ function endGame(won) {
     }
 }
 
-// --- FIREBASE FUNCTIES (AANGEPAST) ---
+// --- FIREBASE FUNCTIES (GEOPTIMALISEERD) ---
 
 function saveScore() {
     const name = nameInput.value.trim() || "Anoniem";
     const score = turn; // Minder beurten is beter
-    const now = Date.now(); 
 
-    // We gebruiken een aparte collectie voor mastermind
-    db.collection("mastermind_scores").add({
-        name: name,
-        score: score,
-        date: now
-    })
-    .then(() => {
+    // AANROEP NAAR NIEUW SCRIPT
+    LeaderboardManager.saveScore("mastermind_scores", name, score, () => {
         alert("Score opgeslagen!");
         msgOverlay.classList.add('hidden'); 
-        openLeaderboard(); 
-    })
-    .catch((error) => {
-        console.error("Fout bij opslaan: ", error);
-        alert("Kon niet verbinden met de database.");
+        openLeaderboard();
     });
 }
 
 function loadLeaderboard() {
-    // AANGEPAST: Laad scores van afgelopen 7 dagen
-    const now = Date.now();
-    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; 
-    const timeAgo = now - sevenDaysInMs;
-
-    db.collection("mastermind_scores")
-        .where("date", ">", timeAgo)
-        .orderBy("date") // Firebase filter vereiste
-        .get()
-        .then((querySnapshot) => {
-            let scores = [];
-            querySnapshot.forEach((doc) => {
-                scores.push(doc.data());
-            });
-
-            // Sorteer: Laagste score (minste beurten) eerst
-            scores.sort((a, b) => a.score - b.score);
-            
-            // AANGEPAST: Top 10 in plaats van Top 3
-            const top10 = scores.slice(0, 10);
-            updateLeaderboardUI(top10);
-        })
-        .catch((error) => {
-            console.log("Error loading scores:", error);
-            highScoreList.innerHTML = '<li><span>Laden...</span></li>';
-        });
-}
-
-function updateLeaderboardUI(topList) {
-    highScoreList.innerHTML = '';
-    
-    if (topList.length === 0) {
-        highScoreList.innerHTML = '<li><span>Nog geen scores deze week!</span></li>';
-        return;
-    }
-
-    topList.forEach((item, index) => {
-        const li = document.createElement('li');
-        
-        // Datum formateren (Dag-Maand Tijd)
-        const dateObj = new Date(item.date);
-        const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
-        const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
-        
-        li.innerHTML = `
-            <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${index + 1}</span>
-            <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
-                <span style="font-weight:bold;">${item.name}</span>
-                <span style="font-size:0.75em; color:#888;">${dateStr} ${timeStr}</span>
-            </div>
-            <span style="font-weight:bold">${item.score}</span>
-        `;
-        highScoreList.appendChild(li);
-    });
+    // AANROEP NAAR NIEUW SCRIPT
+    // 'asc' want laagste score wint
+    LeaderboardManager.loadTop10("mastermind_scores", "highScoreList", "asc");
 }
 
 function openLeaderboard() {
@@ -363,7 +294,6 @@ window.onclick = function(event) {
     }
 }
 </script>
-
 
 </body>
 </html>

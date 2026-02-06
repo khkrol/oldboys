@@ -3,36 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Run Coffey Run - Hattrick Arcade</title>
+    <title>Run Coffey Run - Canvas Editie</title>
     
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/game.css">
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="../js/effects.js"></script>   
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
+    <script src="../js/leaderboard-manager.js"></script>
+
     <style>
         .runner-wrapper {
-            background-image: url('images/coffie-bg.png');
-            background-repeat: repeat-x; 
-            background-size: auto 100%; 
-            background-position: 0px bottom;
-            z-index: 1;
+            position: relative;
+            background-color: #87CEEB; 
+            overflow: hidden; 
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        #coffey, .obstacle, .track, .start-hint {
-            z-index: 10;
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
-        
-        .track {
-            opacity: 0.9; 
+
+        .start-hint {
+            z-index: 20;
+            pointer-events: none; 
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-
     <div class="score-board">
         <div class="score-group">
             <div class="score-item">
@@ -46,22 +61,20 @@
         </div>
         
         <div class="btn-group">
-            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">&#127942;</button>
-            <button class="reset-btn" onclick="resetGame()" title="Reset">&#8635;</button>
+            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">🏆</button>
+            <button class="reset-btn" onclick="resetGame()" title="Reset">↻</button>
         </div>
     </div>
 
-    <div class="runner-wrapper" id="gameArea" onclick="handleGameInput()">
-        <div id="startHint" class="start-hint">
-            TAP OM TE STARTEN<br>
-            <span style="font-size:0.7em; font-weight:normal;">Spring over de schildpadden</span>
-        </div>
+    <div class="runner-wrapper" id="gameWrapper">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
 
-        <div id="coffey">
-            <img src="images/coffie.png" alt="Eloy" onerror="this.src='https://placehold.co/60x90?text=Eloy'">
+        <div id="startHint" class="start-hint">
+            <div style="background: rgba(255,255,255,0.8); padding: 10px; border-radius: 8px; display:inline-block;">
+                <strong>TAP OM TE STARTEN</strong><br>
+                <span style="font-size:0.8em;">Spring over de schildpadden</span>
+            </div>
         </div>
-        
-        <div class="track"></div>
     </div>
 
     <div id="gameOverMsg" class="win-message hidden">
@@ -76,17 +89,13 @@
     </div>
 
     <div class="coach-quote">
-        <strong style="color:var(--ht-green)">Coach:</strong> "Eloy is snel, maar die schildpadden staan altijd in de weg. Timing is alles!"
-    </div>
-    
-    <div class="footer-image">
-        <img src="images/schildpad.png" alt="De tegenstander" style="width: 200px; height: auto;" onerror="this.style.display='none'">
+        <strong style="color:var(--ht-green)">Coach:</strong> "Met deze nieuwe engine loopt Eloy soepeler dan ooit over het veld!"
     </div>
 </div>
 
 <div id="leaderboardModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">&#127942; Topscores</div>
+        <div class="modal-header">🏆 Topscores</div>
         <ul id="highScoreList" class="highscore-list">
             <li><span>Laden...</span></li>
         </ul>
@@ -95,24 +104,19 @@
 </div>
 
 <script>
-    // --- FIREBASE CONFIGURATIE ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
-      authDomain: "oldboys-c58f9.firebaseapp.com",
-      projectId: "oldboys-c58f9",
-      storageBucket: "oldboys-c58f9.firebasestorage.app",
-      messagingSenderId: "23329894436",
-      appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
-    };
+    // --- CANVAS SETUP ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const GAME_WIDTH = 800;
+    const GAME_HEIGHT = 400;
+    const GROUND_HEIGHT = 50; 
 
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
-    const db = firebase.firestore();
+    // --- CONFIGURATIE HOOGTES (Breedte wordt hierop gebaseerd) ---
+    const PLAYER_TARGET_HEIGHT = 130; // Iets groter gemaakt voor duidelijkheid
+    const OBSTACLE_TARGET_HEIGHT = 40; 
 
-    // --- GAME VARIABELEN ---
-    const coffey = document.getElementById("coffey");
-    const gameArea = document.getElementById("gameArea");
+    // --- HTML ELEMENTEN ---
     const scoreDisplay = document.getElementById("scoreValue");
     const highScoreDisplay = document.getElementById("highScoreValue");
     const startHint = document.getElementById("startHint");
@@ -121,37 +125,49 @@
     const saveBtn = document.getElementById('saveButton');
     const nameInput = document.getElementById('playerName');
     const highScoreList = document.getElementById('highScoreList');
-    
-    let isJumping = false;
-    let isGameOver = false;
-    let isGameRunning = false;
-    let score = 0;
-    let gameLoop;
-    let obstacleTimer;
-    let obstacles = [];
-    let scoreSaved = false;
+    const gameWrapper = document.getElementById('gameWrapper');
 
-    // Achtergrond Variabelen
-    let bgPosition = 0;
-    const bgSpeed = 2; 
-    
+    // --- ASSETS (AFBEELDINGEN LADEN) ---
+    const imgCoffey = new Image();
+    imgCoffey.src = 'images/coffie.png';
+    const imgObstacle = new Image();
+    imgObstacle.src = 'images/schildpad.png';
+    const imgBg = new Image();
+    imgBg.src = 'images/coffie-bg.png';
+
+    // --- SPEL STATUS ---
+    let isGameRunning = false;
+    let isGameOver = false;
+    let scoreSaved = false;
+    let score = 0;
     let localHighScore = localStorage.getItem('coffeyHighScore') || 0;
     highScoreDisplay.innerText = localHighScore;
 
-    // --- AUTO START LEADERBOARD FIX ---
-    window.addEventListener('DOMContentLoaded', () => {
-        // Open direct het bord bij het laden van de pagina
-        openLeaderboard();
-    });
+    // --- PHYSICS & LOGICA ---
+    let gameSpeed = 400;
+    let bgX = 0;
+    let lastTime = 0;
+    
+    // Speler Object
+    let player = {
+        w: 60, // Startwaarde (wordt overschreven door auto-ratio)
+        h: PLAYER_TARGET_HEIGHT, 
+        x: 100,
+        get startY() { return GAME_HEIGHT - GROUND_HEIGHT - this.h; }, 
+        y: 0, 
+        dy: 0,
+        jumpForce: 750,
+        gravity: 2000,
+        grounded: true
+    };
+    player.y = player.startY;
 
-    document.addEventListener('keydown', function(event) {
-        if (event.code === 'Space') {
-            handleGameInput();
-            event.preventDefault();
-        }
-    });
+    let obstacles = [];
+    let obstacleTimer = 0;
 
-    function handleGameInput() {
+    // --- INPUT HANDLING ---
+    function handleInput(e) {
+        if(e && e.type === 'touchstart') { /* prevent default */ }
         if (!isGameRunning && !isGameOver) {
             startGame();
         } else if (isGameRunning) {
@@ -159,186 +175,223 @@
         }
     }
 
-    function jump() {
-        if (isJumping || isGameOver) return;
-        if (navigator.vibrate) navigator.vibrate(10); 
+    window.addEventListener('keydown', e => {
+        if (e.code === 'Space' || e.code === 'ArrowUp') {
+            e.preventDefault(); 
+            handleInput();
+        }
+    });
+    gameWrapper.addEventListener('mousedown', handleInput);
+    gameWrapper.addEventListener('touchstart', handleInput, {passive: false});
 
-        isJumping = true;
-        let jumpHeight = 0;
-        
-        let upTimer = setInterval(() => {
-            if (jumpHeight >= 110) { 
-                clearInterval(upTimer);
-                let downTimer = setInterval(() => {
-                    if (jumpHeight <= 0) {
-                        clearInterval(downTimer);
-                        isJumping = false;
-                        jumpHeight = 0;
-                        coffey.style.bottom = "40px"; 
-                    }
-                    jumpHeight -= 5;
-                    coffey.style.bottom = (40 + jumpHeight) + "px";
-                }, 20);
-            }
-            jumpHeight += 8; 
-            coffey.style.bottom = (40 + jumpHeight) + "px";
-        }, 20);
+    window.addEventListener('DOMContentLoaded', () => {
+        openLeaderboard();
+    });
+
+    // --- GAME ACTIES ---
+    function jump() {
+        if (player.grounded) {
+            player.dy = -player.jumpForce;
+            player.grounded = false;
+        }
     }
 
     function startGame() {
-        // Sluit leaderboard als die nog open staat
         closeLeaderboard();
-
         isGameRunning = true;
         isGameOver = false;
-        scoreSaved = false; 
-        
+        scoreSaved = false;
         startHint.style.display = 'none';
-        gameOverMsg.classList.add('hidden'); 
-        
+        gameOverMsg.classList.add('hidden');
         saveBtn.disabled = false;
         saveBtn.innerText = "Opslaan";
         saveBtn.style.opacity = "1";
-        saveBtn.style.cursor = "pointer";
 
         score = 0;
-        bgPosition = 0; 
-        scoreDisplay.innerText = 0;
-        
-        document.querySelectorAll('.obstacle').forEach(e => e.remove());
+        gameSpeed = 400;
+        scoreDisplay.innerText = "0";
         obstacles = [];
-
-        gameLoop = setInterval(updateGame, 20);
-        generateObstacles();
-    }
-
-    function generateObstacles() {
-        if (isGameOver) return;
-        let randomTime = Math.random() * 1500 + 1000;
-        obstacleTimer = setTimeout(() => {
-            if (!isGameOver) {
-                createObstacle();
-                generateObstacles();
-            }
-        }, randomTime);
-    }
-
-    function createObstacle() {
-        const obstacle = document.createElement('div');
-        obstacle.classList.add('obstacle');
-        obstacle.style.left = '100%'; 
+        player.y = player.startY;
+        player.dy = 0;
         
-        const img = document.createElement('img');
-        img.src = 'images/schildpad.png'; 
-        img.alt = 'Schildpad';
-        img.onerror = function() { this.style.display='none'; }; 
-        
-        obstacle.appendChild(img);
-        gameArea.appendChild(obstacle);
-        obstacles.push(obstacle);
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
     }
 
-    function updateGame() {
-        score++;
-        scoreDisplay.innerText = Math.floor(score / 5); 
+    // --- DE GAME LOOP ---
+    function gameLoop(currentTime) {
+        if (!isGameRunning) return;
+        const dt = (currentTime - lastTime) / 1000;
+        lastTime = currentTime;
+        if (dt > 0.1) { requestAnimationFrame(gameLoop); return; }
+        update(dt);
+        draw();
+        if (!isGameOver) { requestAnimationFrame(gameLoop); }
+    }
 
-        bgPosition -= bgSpeed;
-        gameArea.style.backgroundPositionX = bgPosition + "px";
+    function update(dt) {
+        score += dt * 10;
+        scoreDisplay.innerText = Math.floor(score);
+        gameSpeed = 400 + (score * 0.5); 
 
-        obstacles.forEach((obstacle, index) => {
-            let obstacleLeft = parseInt(window.getComputedStyle(obstacle).getPropertyValue("left"));
-            let speed = 5 + (score / 1000); 
-            
-            obstacle.style.left = (obstacleLeft - speed) + "px";
+        bgX -= (gameSpeed * 0.5) * dt; 
+        if (bgX <= -GAME_WIDTH) bgX = 0;
 
-            if (obstacleLeft < -60) { 
-                obstacle.remove();
-                obstacles.splice(index, 1);
-            }
+        // --- UPDATE SPELER AFMETINGEN (AUTO RATIO) ---
+        // We doen dit hier zodat het direct werkt zodra het plaatje geladen is
+        if (imgCoffey.complete && imgCoffey.naturalHeight > 0) {
+            const ratio = imgCoffey.naturalWidth / imgCoffey.naturalHeight;
+            player.w = player.h * ratio; // Breedte past zich aan aan de hoogte
+        }
 
-            let coffeyBottom = parseInt(window.getComputedStyle(coffey).getPropertyValue("bottom"));
-            
-            if (obstacleLeft > 20 && obstacleLeft < 80 && coffeyBottom < 80) {
+        player.dy += player.gravity * dt;
+        player.y += player.dy * dt;
+
+        if (player.y >= player.startY) {
+            player.y = player.startY;
+            player.dy = 0;
+            player.grounded = true;
+        } else {
+            player.grounded = false;
+        }
+
+        obstacleTimer -= dt;
+        if (obstacleTimer <= 0) {
+            spawnObstacle();
+            obstacleTimer = 1.0 + Math.random() * 1.0 - (score/5000);
+            if(obstacleTimer < 0.6) obstacleTimer = 0.6; 
+        }
+
+        // Obstakels update
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            let obs = obstacles[i];
+            obs.x -= gameSpeed * dt;
+            if (obs.x + obs.w < 0) { obstacles.splice(i, 1); }
+
+            // Hitbox padding (iets vergevingsgezinder)
+            const pX = 20; 
+            const pY = 12;
+
+            if (
+                player.x < obs.x + obs.w - pX &&
+                player.x + player.w > obs.x + pX &&
+                player.y < obs.y + obs.h - pY &&
+                player.y + player.h > obs.y + pY
+            ) {
                 gameOver();
+            }
+        }
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+        // 1. Achtergrond
+        if (imgBg.complete) {
+            ctx.drawImage(imgBg, bgX, 0, GAME_WIDTH, GAME_HEIGHT);
+            ctx.drawImage(imgBg, bgX + GAME_WIDTH, 0, GAME_WIDTH, GAME_HEIGHT);
+        } else {
+            ctx.fillStyle = "#87CEEB";
+            ctx.fillRect(0,0, GAME_WIDTH, GAME_HEIGHT);
+        }
+
+        // 2. Speler
+        if (imgCoffey.complete) {
+            // Teken de speler met de berekende 'auto' breedte (player.w)
+            ctx.drawImage(imgCoffey, player.x, player.y, player.w, player.h);
+        } else {
+            ctx.fillStyle = "red";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+        }
+
+        // 3. Obstakels
+        obstacles.forEach(obs => {
+            if (imgObstacle.complete) {
+                ctx.drawImage(imgObstacle, obs.x, obs.y, obs.w, obs.h);
+            } else {
+                ctx.fillStyle = "green";
+                ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
             }
         });
     }
 
-    function gameOver() {
-        isGameOver = true;
-        isGameRunning = false;
-        clearInterval(gameLoop);
-        clearTimeout(obstacleTimer);
-        
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+    function spawnObstacle() {
+        let obsH = OBSTACLE_TARGET_HEIGHT;
+        let obsW = 50; // Fallback breedte
 
-        let finalScore = Math.floor(score / 5);
-        finalScoreSpan.innerText = finalScore;
-        
-        gameOverMsg.classList.remove('hidden');
-
-        if (finalScore > localHighScore) {
-            localHighScore = finalScore;
-            localStorage.setItem('coffeyHighScore', localHighScore);
-            highScoreDisplay.innerText = localHighScore;
+        // Bereken breedte op basis van ratio als plaatje geladen is
+        if (imgObstacle.complete && imgObstacle.naturalHeight > 0) {
+            const ratio = imgObstacle.naturalWidth / imgObstacle.naturalHeight;
+            obsW = obsH * ratio;
         }
+        
+        obstacles.push({
+            x: GAME_WIDTH,
+            y: GAME_HEIGHT - GROUND_HEIGHT - obsH + 5, // +5 om hem iets 'in' het zand te zetten
+            w: obsW,
+            h: obsH
+        });
     }
+
+    // --- GAME OVER & SCORE ---
+function gameOver() {
+    isGameOver = true;
+    isGameRunning = false;
+    
+    HattrickFX.shakeScreen(); 
+
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+    
+    let finalScore = Math.floor(score);
+    finalScoreSpan.innerText = finalScore;
+    gameOverMsg.classList.remove('hidden');
+
+    if (finalScore > localHighScore) {
+        localHighScore = finalScore;
+        localStorage.setItem('coffeyHighScore', localHighScore);
+        highScoreDisplay.innerText = localHighScore;
+        
+        HattrickFX.highScore(); 
+    }
+}
 
     function resetGame() {
         isGameOver = false;
         isGameRunning = false;
-        clearInterval(gameLoop);
-        clearTimeout(obstacleTimer);
-        
         startHint.style.display = 'block';
         gameOverMsg.classList.add('hidden');
-        
         score = 0;
-        bgPosition = 0;
         scoreDisplay.innerText = 0;
-        gameArea.style.backgroundPositionX = "0px"; 
-        coffey.style.bottom = "40px";
         
-        document.querySelectorAll('.obstacle').forEach(e => e.remove());
+        ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+        if (imgBg.complete) ctx.drawImage(imgBg, 0, 0, GAME_WIDTH, GAME_HEIGHT);
+        
+        // Update player position voor reset (rekening houdend met nieuwe hoogte)
+        player.y = player.startY;
+        if (imgCoffey.complete) ctx.drawImage(imgCoffey, player.x, player.y, player.w, player.h);
     }
 
     function saveScore() {
         if (scoreSaved) return;
         const name = nameInput.value.trim() || "Anoniem";
-        const finalPoints = Math.floor(score / 5);
-        const now = Date.now(); 
-
+        const finalPoints = Math.floor(score);
         scoreSaved = true;
         saveBtn.disabled = true;
         saveBtn.innerText = "Bezig...";
         saveBtn.style.opacity = "0.7";
 
-        db.collection("coffey_scores").add({
-            name: name,
-            score: finalPoints,
-            date: now
-        })
-        .then(() => {
+        LeaderboardManager.saveScore("coffey_scores", name, finalPoints, () => {
             saveBtn.innerText = "Opgeslagen!";
             setTimeout(() => {
                 gameOverMsg.classList.add('hidden');
                 openLeaderboard(); 
             }, 500);
-        })
-        .catch((error) => {
-            console.error("Fout bij opslaan: ", error);
-            alert("Kon niet verbinden met de database.");
-            scoreSaved = false; 
-            saveBtn.disabled = false;
-            saveBtn.innerText = "Probeer opnieuw";
-            saveBtn.style.opacity = "1";
         });
     }
 
-    // --- LEADERBOARD LOGICA (VERBETERD MET TIJD) ---
     function openLeaderboard() {
         document.getElementById('leaderboardModal').style.display = 'flex';
-        loadLeaderboard(); 
+        LeaderboardManager.loadTop10("coffey_scores", "highScoreList", "desc");
     }
 
     function closeLeaderboard() {
@@ -347,85 +400,7 @@
 
     window.onclick = function(event) {
         const modal = document.getElementById('leaderboardModal');
-        if (event.target == modal) {
-            closeLeaderboard();
-        }
-    }
-
-    function loadLeaderboard() {
-        if (!db) return; // Wacht tot DB klaar is
-
-        const now = Date.now();
-        const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-        const weekAgo = now - sevenDaysInMs;
-
-        // Probeer eerst week scores
-        db.collection("coffey_scores")
-            .where("date", ">", weekAgo)
-            .get()
-            .then((querySnapshot) => {
-                let scores = [];
-                querySnapshot.forEach((doc) => {
-                    scores.push(doc.data());
-                });
-
-                // Als er geen recente scores zijn, laad dan de fallback
-                if (scores.length === 0) {
-                    loadFallbackLeaderboard();
-                    return;
-                }
-
-                // Sorteren hoog naar laag
-                scores.sort((a, b) => b.score - a.score);
-                const top10 = scores.slice(0, 10);
-                updateLeaderboardUI(top10);
-            })
-            .catch((error) => {
-                console.log("Week filter failed (index?), loading fallback:", error);
-                loadFallbackLeaderboard();
-            });
-    }
-
-    function loadFallbackLeaderboard() {
-        db.collection("coffey_scores")
-            .orderBy("score", "desc")
-            .limit(10)
-            .get()
-            .then((querySnapshot) => {
-                let scores = [];
-                querySnapshot.forEach((doc) => scores.push(doc.data()));
-                
-                if(scores.length === 0) {
-                     highScoreList.innerHTML = '<li><span>Nog geen scores!</span></li>';
-                } else {
-                     updateLeaderboardUI(scores);
-                }
-            })
-            .catch((err) => {
-                console.error("Fallback ook mislukt:", err);
-                highScoreList.innerHTML = '<li><span>Laden mislukt.</span></li>';
-            });
-    }
-
-    function updateLeaderboardUI(topList) {
-        highScoreList.innerHTML = '';
-        topList.forEach((item, index) => {
-            const li = document.createElement('li');
-            const dateObj = new Date(item.date);
-            // AANGEPAST: Datum EN Tijd
-            const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
-            const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
-            
-            li.innerHTML = `
-                <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${index + 1}</span>
-                <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
-                    <span style="font-weight:bold;">${item.name}</span>
-                    <span style="font-size:0.75em; color:#888;">${dateStr} ${timeStr}</span>
-                </div>
-                <span style="font-weight:bold">${item.score}</span>
-            `;
-            highScoreList.appendChild(li);
-        });
+        if (event.target == modal) { closeLeaderboard(); }
     }
 </script>
 
