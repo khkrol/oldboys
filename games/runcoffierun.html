@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Run Coffey Run - Hattrick Arcade</title>
+    
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/game.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        .runner-wrapper {
+            background-image: url('images/coffie-bg.png');
+            background-repeat: repeat-x; 
+            background-size: auto 100%; 
+            background-position: 0px bottom;
+            z-index: 1;
+        }
+
+        #coffey, .obstacle, .track, .start-hint {
+            z-index: 10;
+        }
+        
+        .track {
+            opacity: 0.9; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div class="score-board">
+        <div class="score-group">
+            <div class="score-item">
+                <span class="score-label">Score</span>
+                <span id="scoreValue" class="score-value">0</span>
+            </div>
+            <div class="score-item">
+                <span class="score-label">Highscore</span>
+                <span id="highScoreValue" class="score-value">0</span>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">&#127942;</button>
+            <button class="reset-btn" onclick="resetGame()" title="Reset">&#8635;</button>
+        </div>
+    </div>
+
+    <div class="runner-wrapper" id="gameArea" onclick="handleGameInput()">
+        <div id="startHint" class="start-hint">
+            TAP OM TE STARTEN<br>
+            <span style="font-size:0.7em; font-weight:normal;">Spring over de schildpadden</span>
+        </div>
+
+        <div id="coffey">
+            <img src="images/coffie.png" alt="Eloy" onerror="this.src='https://placehold.co/60x90?text=Eloy'">
+        </div>
+        
+        <div class="track"></div>
+    </div>
+
+    <div id="gameOverMsg" class="win-message hidden">
+        <h3>Horde geraakt!</h3>
+        <p>Je eindscore is: <span id="finalScore" style="font-weight:bold; font-size:1.2em;">0</span></p>
+        
+        <div class="input-area">
+            <input type="text" id="playerName" placeholder="Manager Naam" maxlength="15">
+            <button class="save-btn" id="saveButton" onclick="saveScore()">Opslaan</button>
+        </div>
+        <button class="close-msg-btn" style="background:#888;" onclick="resetGame()">Nog een keer</button>
+    </div>
+
+    <div class="coach-quote">
+        <strong style="color:var(--ht-green)">Coach:</strong> "Eloy is snel, maar die schildpadden staan altijd in de weg. Timing is alles!"
+    </div>
+    
+    <div class="footer-image">
+        <img src="images/schildpad.png" alt="De tegenstander" style="width: 200px; height: auto;" onerror="this.style.display='none'">
+    </div>
+</div>
+
+<div id="leaderboardModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">&#127942; Topscores</div>
+        <ul id="highScoreList" class="highscore-list">
+            <li><span>Laden...</span></li>
+        </ul>
+        <button class="close-btn" onclick="closeLeaderboard()">Sluiten</button>
+    </div>
+</div>
+
+<script>
+    // --- FIREBASE CONFIGURATIE ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
+      authDomain: "oldboys-c58f9.firebaseapp.com",
+      projectId: "oldboys-c58f9",
+      storageBucket: "oldboys-c58f9.firebasestorage.app",
+      messagingSenderId: "23329894436",
+      appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    // --- GAME VARIABELEN ---
+    const coffey = document.getElementById("coffey");
+    const gameArea = document.getElementById("gameArea");
+    const scoreDisplay = document.getElementById("scoreValue");
+    const highScoreDisplay = document.getElementById("highScoreValue");
+    const startHint = document.getElementById("startHint");
+    const gameOverMsg = document.getElementById("gameOverMsg");
+    const finalScoreSpan = document.getElementById("finalScore");
+    const saveBtn = document.getElementById('saveButton');
+    const nameInput = document.getElementById('playerName');
+    const highScoreList = document.getElementById('highScoreList');
+    
+    let isJumping = false;
+    let isGameOver = false;
+    let isGameRunning = false;
+    let score = 0;
+    let gameLoop;
+    let obstacleTimer;
+    let obstacles = [];
+    let scoreSaved = false;
+
+    // Achtergrond Variabelen
+    let bgPosition = 0;
+    const bgSpeed = 2; 
+    
+    let localHighScore = localStorage.getItem('coffeyHighScore') || 0;
+    highScoreDisplay.innerText = localHighScore;
+
+    // --- AUTO START LEADERBOARD FIX ---
+    window.addEventListener('DOMContentLoaded', () => {
+        // Open direct het bord bij het laden van de pagina
+        openLeaderboard();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {
+            handleGameInput();
+            event.preventDefault();
+        }
+    });
+
+    function handleGameInput() {
+        if (!isGameRunning && !isGameOver) {
+            startGame();
+        } else if (isGameRunning) {
+            jump();
+        }
+    }
+
+    function jump() {
+        if (isJumping || isGameOver) return;
+        if (navigator.vibrate) navigator.vibrate(10); 
+
+        isJumping = true;
+        let jumpHeight = 0;
+        
+        let upTimer = setInterval(() => {
+            if (jumpHeight >= 110) { 
+                clearInterval(upTimer);
+                let downTimer = setInterval(() => {
+                    if (jumpHeight <= 0) {
+                        clearInterval(downTimer);
+                        isJumping = false;
+                        jumpHeight = 0;
+                        coffey.style.bottom = "40px"; 
+                    }
+                    jumpHeight -= 5;
+                    coffey.style.bottom = (40 + jumpHeight) + "px";
+                }, 20);
+            }
+            jumpHeight += 8; 
+            coffey.style.bottom = (40 + jumpHeight) + "px";
+        }, 20);
+    }
+
+    function startGame() {
+        // Sluit leaderboard als die nog open staat
+        closeLeaderboard();
+
+        isGameRunning = true;
+        isGameOver = false;
+        scoreSaved = false; 
+        
+        startHint.style.display = 'none';
+        gameOverMsg.classList.add('hidden'); 
+        
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Opslaan";
+        saveBtn.style.opacity = "1";
+        saveBtn.style.cursor = "pointer";
+
+        score = 0;
+        bgPosition = 0; 
+        scoreDisplay.innerText = 0;
+        
+        document.querySelectorAll('.obstacle').forEach(e => e.remove());
+        obstacles = [];
+
+        gameLoop = setInterval(updateGame, 20);
+        generateObstacles();
+    }
+
+    function generateObstacles() {
+        if (isGameOver) return;
+        let randomTime = Math.random() * 1500 + 1000;
+        obstacleTimer = setTimeout(() => {
+            if (!isGameOver) {
+                createObstacle();
+                generateObstacles();
+            }
+        }, randomTime);
+    }
+
+    function createObstacle() {
+        const obstacle = document.createElement('div');
+        obstacle.classList.add('obstacle');
+        obstacle.style.left = '100%'; 
+        
+        const img = document.createElement('img');
+        img.src = 'images/schildpad.png'; 
+        img.alt = 'Schildpad';
+        img.onerror = function() { this.style.display='none'; }; 
+        
+        obstacle.appendChild(img);
+        gameArea.appendChild(obstacle);
+        obstacles.push(obstacle);
+    }
+
+    function updateGame() {
+        score++;
+        scoreDisplay.innerText = Math.floor(score / 5); 
+
+        bgPosition -= bgSpeed;
+        gameArea.style.backgroundPositionX = bgPosition + "px";
+
+        obstacles.forEach((obstacle, index) => {
+            let obstacleLeft = parseInt(window.getComputedStyle(obstacle).getPropertyValue("left"));
+            let speed = 5 + (score / 1000); 
+            
+            obstacle.style.left = (obstacleLeft - speed) + "px";
+
+            if (obstacleLeft < -60) { 
+                obstacle.remove();
+                obstacles.splice(index, 1);
+            }
+
+            let coffeyBottom = parseInt(window.getComputedStyle(coffey).getPropertyValue("bottom"));
+            
+            if (obstacleLeft > 20 && obstacleLeft < 80 && coffeyBottom < 80) {
+                gameOver();
+            }
+        });
+    }
+
+    function gameOver() {
+        isGameOver = true;
+        isGameRunning = false;
+        clearInterval(gameLoop);
+        clearTimeout(obstacleTimer);
+        
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]); 
+
+        let finalScore = Math.floor(score / 5);
+        finalScoreSpan.innerText = finalScore;
+        
+        gameOverMsg.classList.remove('hidden');
+
+        if (finalScore > localHighScore) {
+            localHighScore = finalScore;
+            localStorage.setItem('coffeyHighScore', localHighScore);
+            highScoreDisplay.innerText = localHighScore;
+        }
+    }
+
+    function resetGame() {
+        isGameOver = false;
+        isGameRunning = false;
+        clearInterval(gameLoop);
+        clearTimeout(obstacleTimer);
+        
+        startHint.style.display = 'block';
+        gameOverMsg.classList.add('hidden');
+        
+        score = 0;
+        bgPosition = 0;
+        scoreDisplay.innerText = 0;
+        gameArea.style.backgroundPositionX = "0px"; 
+        coffey.style.bottom = "40px";
+        
+        document.querySelectorAll('.obstacle').forEach(e => e.remove());
+    }
+
+    function saveScore() {
+        if (scoreSaved) return;
+        const name = nameInput.value.trim() || "Anoniem";
+        const finalPoints = Math.floor(score / 5);
+        const now = Date.now(); 
+
+        scoreSaved = true;
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Bezig...";
+        saveBtn.style.opacity = "0.7";
+
+        db.collection("coffey_scores").add({
+            name: name,
+            score: finalPoints,
+            date: now
+        })
+        .then(() => {
+            saveBtn.innerText = "Opgeslagen!";
+            setTimeout(() => {
+                gameOverMsg.classList.add('hidden');
+                openLeaderboard(); 
+            }, 500);
+        })
+        .catch((error) => {
+            console.error("Fout bij opslaan: ", error);
+            alert("Kon niet verbinden met de database.");
+            scoreSaved = false; 
+            saveBtn.disabled = false;
+            saveBtn.innerText = "Probeer opnieuw";
+            saveBtn.style.opacity = "1";
+        });
+    }
+
+    // --- LEADERBOARD LOGICA (VERBETERD MET TIJD) ---
+    function openLeaderboard() {
+        document.getElementById('leaderboardModal').style.display = 'flex';
+        loadLeaderboard(); 
+    }
+
+    function closeLeaderboard() {
+        document.getElementById('leaderboardModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('leaderboardModal');
+        if (event.target == modal) {
+            closeLeaderboard();
+        }
+    }
+
+    function loadLeaderboard() {
+        if (!db) return; // Wacht tot DB klaar is
+
+        const now = Date.now();
+        const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+        const weekAgo = now - sevenDaysInMs;
+
+        // Probeer eerst week scores
+        db.collection("coffey_scores")
+            .where("date", ">", weekAgo)
+            .get()
+            .then((querySnapshot) => {
+                let scores = [];
+                querySnapshot.forEach((doc) => {
+                    scores.push(doc.data());
+                });
+
+                // Als er geen recente scores zijn, laad dan de fallback
+                if (scores.length === 0) {
+                    loadFallbackLeaderboard();
+                    return;
+                }
+
+                // Sorteren hoog naar laag
+                scores.sort((a, b) => b.score - a.score);
+                const top10 = scores.slice(0, 10);
+                updateLeaderboardUI(top10);
+            })
+            .catch((error) => {
+                console.log("Week filter failed (index?), loading fallback:", error);
+                loadFallbackLeaderboard();
+            });
+    }
+
+    function loadFallbackLeaderboard() {
+        db.collection("coffey_scores")
+            .orderBy("score", "desc")
+            .limit(10)
+            .get()
+            .then((querySnapshot) => {
+                let scores = [];
+                querySnapshot.forEach((doc) => scores.push(doc.data()));
+                
+                if(scores.length === 0) {
+                     highScoreList.innerHTML = '<li><span>Nog geen scores!</span></li>';
+                } else {
+                     updateLeaderboardUI(scores);
+                }
+            })
+            .catch((err) => {
+                console.error("Fallback ook mislukt:", err);
+                highScoreList.innerHTML = '<li><span>Laden mislukt.</span></li>';
+            });
+    }
+
+    function updateLeaderboardUI(topList) {
+        highScoreList.innerHTML = '';
+        topList.forEach((item, index) => {
+            const li = document.createElement('li');
+            const dateObj = new Date(item.date);
+            // AANGEPAST: Datum EN Tijd
+            const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
+            const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+            
+            li.innerHTML = `
+                <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${index + 1}</span>
+                <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
+                    <span style="font-weight:bold;">${item.name}</span>
+                    <span style="font-size:0.75em; color:#888;">${dateStr} ${timeStr}</span>
+                </div>
+                <span style="font-weight:bold">${item.score}</span>
+            `;
+            highScoreList.appendChild(li);
+        });
+    }
+</script>
+
+</body>
+</html>

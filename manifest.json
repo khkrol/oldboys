@@ -2,12 +2,13 @@
   "name": "Potter's Football Group",
   "short_name": "PFG",
   "description": "De ultieme verzameling spellen en Hattrick tools.",
-  "start_url": "./index.html",
-  "id": "./",
+  "start_url": "./index.html#bestuurskamer",
+  "id": "potters-football-group-v1",
   "display": "standalone",
   "background_color": "#3D7C3B",
   "theme_color": "#3D7C3B",
   "orientation": "portrait",
+  "categories": ["sports", "utilities", "games"],
   "icons": [
     {
       "src": "assets/images/potters.jpg",
@@ -27,7 +28,18 @@
       "name": "Carieb Shuffle",
       "short_name": "Shuffle",
       "description": "Start direct een potje Carieb Shuffle",
-      "url": "./memory/index.html",
+      "url": "./index.html#memory",
+      "icons": [{ 
+          "src": "assets/images/potters.jpg", 
+          "sizes": "192x192",
+          "type": "image/jpeg"
+      }]
+    },
+    {
+      "name": "Bestuurskamer",
+      "short_name": "Bestuur",
+      "description": "Ga naar de bestuurskamer",
+      "url": "./index.html#bestuurskamer",
       "icons": [{ 
           "src": "assets/images/potters.jpg", 
           "sizes": "192x192",

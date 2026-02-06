@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Potter's Player Puzzle - Hattrick Arcade</title>
+    
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/game.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+
+<style>
+    /* Zorg dat de container geen witruimte heeft */
+    .puzzle-wrapper {
+        padding: 0 !important; /* Forceer 0 padding */
+        overflow: hidden;      /* Zorg dat de afbeelding niet buiten de ronde hoeken komt */
+        display: flex;         /* Zorgt dat de inhoud de hoogte vult */
+        flex-direction: column;
+        min-height: 350px;     /* Minimale hoogte voor desktop én mobiel */
+    }
+
+    /* Zorg dat het startscherm de volledige ruimte pakt */
+    .start-overlay {
+        flex: 1;              /* Vult de resterende ruimte */
+        width: 100%;          /* Breedte 100% */
+        border-radius: 0;     /* Geen extra randen binnenin */
+        margin: 0;
+    }
+</style>
+
+<body>
+
+<div class="app-container">
+
+    <div class="score-board">
+        <div class="score-group">
+            <div class="score-item">
+                <span class="score-label">Tijd</span>
+                <span id="timerDisplay" class="score-value">0.0s</span>
+            </div>
+            <div class="score-item">
+                <span class="score-label">Voortgang</span>
+                <span id="progressDisplay" class="score-value">0/5</span>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">&#127942;</button>
+            <button class="reset-btn" onclick="resetGame()" title="Reset">&#8635;</button>
+        </div>
+    </div>
+
+    <div class="puzzle-wrapper">
+
+<div id="startScreen" class="start-overlay" style="
+            background-image: url('images/playerpuzzle.png'); 
+            background-size: cover; 
+            background-position: center;
+            width: 100%;
+            height: 100%;
+            min-height: 350px; /* Zorgt dat de afbeelding altijd hoog genoeg is */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        ">
+            <div style="
+                background-color: rgba(255, 255, 255, 0.92); 
+                padding: 20px; 
+                border-radius: 12px; 
+                width: 90%; 
+                max-width: 300px; 
+                text-align: center;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+                backdrop-filter: blur(2px); /* Geeft een mooi matglas effect */
+            ">
+                <h2 style="color:var(--ht-green); margin-top: 0; margin-bottom: 5px; font-size: 1.5em;">Potter's Puzzle</h2>
+                <p style="color:#444; margin-bottom: 15px; font-size: 0.95em;">Raad 5 namen zo snel mogelijk!</p>
+                <div id="loadingMsg">Namen laden...</div>
+                <button id="startBtn" class="start-btn" onclick="startGame()" style="display:none; width: 100%; font-weight: bold;">START GAME</button>
+            </div>
+        </div>
+
+        <div id="gamePlayArea" style="width: 100%; display: none;">
+            <div style="font-size: 0.9em; color:#666; margin-bottom:5px;">Wie is deze speler?</div>
+            <div id="scrambledWord" class="puzzle-word">???</div>
+            
+            <input type="text" id="playerInput" class="puzzle-input" placeholder="Typ de naam..." autocomplete="off">
+            <br>
+            <button class="btn-submit" onclick="checkAnswer()">CHECK</button>
+        </div>
+
+        <div id="winMsg" class="win-message hidden">
+            <h3 style="color:var(--ht-green); margin-top:0;">Puzzel Opgelost!</h3>
+            <p>Je tijd: <span id="finalTime" style="font-weight:bold; font-size:1.2em;">0.0s</span></p>
+            
+            <div class="input-area">
+                <input type="text" id="playerName" placeholder="Manager Naam" maxlength="15">
+                <button class="save-btn" id="saveButton" onclick="saveScore()">Opslaan</button>
+            </div>
+            <button class="close-btn" style="background:#888;" onclick="resetGame()">Nog een keer</button>
+        </div>
+    </div>
+
+    <div class="coach-quote">
+        <strong style="color:var(--ht-green)">Coach:</strong> "Op het formulier staat het een rommeltje, maar op het veld weten ze precies wie ze zijn!"
+    </div>
+    
+    <div class="footer-image">
+        <img src="../runcoffeyrun/schildpad.jpg" alt="Hattrick Icon" style="width: 50px; height: auto;" onerror="this.style.display='none'">
+    </div>
+</div>
+
+<div id="leaderboardModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">&#127942; Snelste Puzzelaars</div>
+        <ul id="highScoreList" class="highscore-list">
+            <li><span>Laden...</span></li>
+        </ul>
+        <button class="close-btn" onclick="closeLeaderboard()">Sluiten</button>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDnYWBnPqiurKK_vM4C_JT07UxGpaaifGs",
+      authDomain: "oldboys-c58f9.firebaseapp.com",
+      projectId: "oldboys-c58f9",
+      storageBucket: "oldboys-c58f9.firebasestorage.app",
+      messagingSenderId: "23329894436",
+      appId: "1:23329894436:web:8cd9d409be74fce51f28b1"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    const allPlayers = [
+        "COFFIE", "CICILIA", "BROOS", "NEPOMUCENO", "VAN HEYDOORN",
+        "WILLEMS", "PIETER", "LEEPEL", "MARTINA", "SYMOR", "CROES", "CIJNTJE"
+    ];
+
+    let gameQueue = [];
+    let currentName = "";
+    let solvedCount = 0;
+    const maxRounds = 5;
+    
+    let startTime;
+    let timerInterval;
+    let currentTime = 0;
+    let scoreSaved = false;
+
+    const startScreen = document.getElementById('startScreen');
+    const loadingMsg = document.getElementById('loadingMsg');
+    const startBtn = document.getElementById('startBtn');
+    const gamePlayArea = document.getElementById('gamePlayArea');
+    const scrambledWordEl = document.getElementById('scrambledWord');
+    const inputEl = document.getElementById('playerInput');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const progressDisplay = document.getElementById('progressDisplay');
+    const winMsg = document.getElementById('winMsg');
+    const finalTimeSpan = document.getElementById('finalTime');
+    const saveBtn = document.getElementById('saveButton');
+    const highScoreList = document.getElementById('highScoreList');
+
+    // --- AUTO START LEADERBOARD FIX ---
+    window.addEventListener('DOMContentLoaded', () => {
+        loadingMsg.style.display = 'none';
+        startBtn.style.display = 'block';
+        
+        // Open leaderboard direct bij laden
+        openLeaderboard();
+    });
+
+    function startGame() {
+        closeLeaderboard(); // Sluit popup bij start
+
+        if (allPlayers.length < maxRounds) {
+            alert("Niet genoeg spelers in de lijst voor een game!");
+            return;
+        }
+
+        solvedCount = 0;
+        currentTime = 0;
+        scoreSaved = false;
+        timerDisplay.innerText = "0.0s";
+        progressDisplay.innerText = `0/${maxRounds}`;
+        
+        gameQueue = [...allPlayers].sort(() => 0.5 - Math.random()).slice(0, maxRounds);
+        
+        startScreen.style.display = 'none';
+        winMsg.classList.add('hidden');
+        winMsg.style.display = ''; 
+        gamePlayArea.style.display = 'block';
+        inputEl.value = "";
+        
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Opslaan";
+        saveBtn.style.opacity = "1";
+
+        startTime = Date.now();
+        timerInterval = setInterval(updateTimer, 100); 
+        
+        loadNextRound();
+    }
+
+    function loadNextRound() {
+        if (solvedCount >= maxRounds) {
+            endGame();
+            return;
+        }
+        currentName = gameQueue[solvedCount];
+        scrambledWordEl.innerText = scrambleString(currentName);
+        inputEl.value = "";
+        inputEl.focus();
+        inputEl.classList.remove('wrong', 'correct');
+    }
+
+    function scrambleString(str) {
+        const arr = str.split('');
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        let scrambled = arr.join('');
+        if (scrambled === str && str.length > 1) {
+            return scrambleString(str);
+        }
+        return scrambled;
+    }
+
+    function checkAnswer() {
+        const userVal = inputEl.value.trim().toLowerCase();
+        const correctVal = currentName.toLowerCase();
+
+        if (userVal === correctVal) {
+            inputEl.classList.add('correct');
+            solvedCount++;
+            progressDisplay.innerText = `${solvedCount}/${maxRounds}`;
+            setTimeout(() => {
+                inputEl.classList.remove('correct');
+                loadNextRound();
+            }, 400); 
+        } else {
+            inputEl.classList.add('wrong');
+            setTimeout(() => {
+                inputEl.classList.remove('wrong');
+            }, 400);
+        }
+    }
+
+    inputEl.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            checkAnswer();
+        }
+    });
+
+    function updateTimer() {
+        const now = Date.now();
+        const diff = now - startTime;
+        currentTime = (diff / 1000).toFixed(1);
+        timerDisplay.innerText = currentTime + "s";
+    }
+
+    function endGame() {
+        clearInterval(timerInterval);
+        finalTimeSpan.innerText = currentTime + "s";
+        winMsg.classList.remove('hidden');
+    }
+
+    function resetGame() {
+        clearInterval(timerInterval);
+        startScreen.style.display = 'flex';
+        gamePlayArea.style.display = 'none';
+        winMsg.classList.add('hidden');
+    }
+
+    function saveScore() {
+        if (scoreSaved) return;
+        const nameInput = document.getElementById('playerName');
+        const name = nameInput.value.trim() || "Anoniem";
+        const scoreTime = parseFloat(currentTime); 
+        const now = Date.now(); 
+
+        scoreSaved = true;
+        saveBtn.disabled = true;
+        saveBtn.innerText = "Bezig...";
+        saveBtn.style.opacity = "0.7";
+
+        db.collection("puzzle_scores").add({
+            name: name,
+            score: scoreTime,
+            date: now
+        })
+        .then(() => {
+            saveBtn.innerText = "Opgeslagen!";
+            setTimeout(() => {
+                winMsg.classList.add('hidden');
+                openLeaderboard(); 
+            }, 500);
+        })
+        .catch((error) => {
+            console.error("Fout bij opslaan: ", error);
+            alert("Kon niet verbinden met de database.");
+            scoreSaved = false; 
+            saveBtn.disabled = false;
+            saveBtn.innerText = "Probeer opnieuw";
+            saveBtn.style.opacity = "1";
+        });
+    }
+
+    function openLeaderboard() {
+        document.getElementById('leaderboardModal').style.display = 'flex';
+        loadLeaderboard(); 
+    }
+
+    function closeLeaderboard() {
+        document.getElementById('leaderboardModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('leaderboardModal');
+        if (event.target == modal) {
+            closeLeaderboard();
+        }
+    }
+
+    function loadLeaderboard() {
+        const highScoreList = document.getElementById('highScoreList');
+        
+        if (!db) return;
+
+        db.collection("puzzle_scores")
+            .orderBy("score", "asc") 
+            .limit(10)
+            .get()
+            .then((querySnapshot) => {
+                let html = '';
+                if (querySnapshot.empty) {
+                    html = '<li><span>Nog geen scores!</span></li>';
+                } else {
+                    let rank = 1;
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        
+                        // AANGEPAST: Datum EN Tijd net zoals Memory/Coffie
+                        const dateObj = new Date(data.date);
+                        const dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
+                        const timeStr = dateObj.toLocaleTimeString('nl-NL', {hour: '2-digit', minute: '2-digit'});
+
+                        html += `
+                            <li>
+                                <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${rank}</span>
+                                <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
+                                    <span style="font-weight:bold;">${data.name}</span>
+                                    <span style="font-size:0.75em; color:#888;">${dateStr} ${timeStr}</span>
+                                </div>
+                                <span style="font-weight:bold">${data.score.toFixed(1)}s</span>
+                            </li>
+                        `;
+                        rank++;
+                    });
+                }
+                highScoreList.innerHTML = html;
+            })
+            .catch((error) => {
+                console.log("Error loading scores:", error);
+                if (error.message && error.message.includes("index")) {
+                     highScoreList.innerHTML = '<li><span style="color:red; font-size:0.8em">Index nodig! Check Console.</span></li>';
+                } else {
+                     highScoreList.innerHTML = '<li><span>Laden mislukt...</span></li>';
+                }
+            });
+    }
+</script>
+</body>
+</html>

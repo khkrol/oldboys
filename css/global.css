@@ -103,8 +103,9 @@ h1 {
     width: 80px;
     height: auto;
     margin-right: 15px;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    /* AANGEPAST: Geen CSS schaduw of radius meer, want dat zit al in de foto */
+    border: none;
+    background: transparent;
 }
 
 .quote-wrapper {

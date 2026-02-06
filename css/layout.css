@@ -1,0 +1,176 @@
+/* =========================================
+   LAYOUT & SHELL STYLING
+   ========================================= */
+
+:root {
+    --nav-width: 260px;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    /* Gebruik dvh (Dynamic Viewport Height) voor moderne mobiele browsers */
+    height: 100dvh; 
+    width: 100%;
+    background-color: var(--ht-bg);
+    display: flex;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+/* --- SIDEBAR NAVIGATIE --- */
+nav {
+    width: var(--nav-width);
+    background: linear-gradient(180deg, var(--ht-green-dark) 0%, #1a3819 100%);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.3);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.nav-header {
+    padding: 20px;
+    background-color: transparent;
+    background-image: linear-gradient(to right, rgba(255,255,255,0.05), transparent);
+    text-align: center;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.nav-header h1 {
+    color: var(--white);
+    font-size: 1.1em;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Scrollbar styling */
+.menu-grid::-webkit-scrollbar { width: 5px; }
+.menu-grid::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+/* --- NAV ITEMS --- */
+.nav-category {
+    padding: 25px 20px 8px 20px;
+    font-size: 0.7em;
+    text-transform: uppercase;
+    color: var(--ht-yellow);
+    font-weight: bold;
+    opacity: 0.7;
+    letter-spacing: 1px;
+    pointer-events: none;
+}
+
+.nav-item {
+    padding: 12px 20px;
+    margin: 2px 10px;
+    border-radius: 8px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border-left: none;
+    position: relative;
+}
+
+.nav-item:hover {
+    background-color: rgba(255,255,255,0.15);
+    color: var(--white);
+    transform: translateX(3px);
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, rgba(255, 194, 0, 0.15) 0%, transparent 100%);
+    color: var(--ht-yellow);
+    border-left: 3px solid var(--ht-yellow);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-weight: bold;
+}
+
+/* --- MAIN CONTENT & IFRAME --- */
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+}
+
+iframe {
+    width: 100%;
+    flex: 1;
+    border: none;
+    background-color: var(--ht-bg);
+    transition: opacity 0.3s ease;
+    opacity: 0; /* Start onzichtbaar voor fade-in effect */
+}
+
+iframe.fade-in {
+    opacity: 1;
+}
+
+/* --- MOBIELE BAR --- */
+.mobile-bar {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background-color: var(--ht-green);
+    color: white;
+    padding: 12px 15px;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.burger-btn {
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    padding: 0;
+}
+
+/* Responsive */
+@media (max-width: 850px) {
+    nav {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100dvh;
+        transform: translateX(-100%);
+    }
+
+    nav.open {
+        transform: translateX(0);
+    }
+
+    .mobile-bar {
+        display: flex;
+    }
+}
