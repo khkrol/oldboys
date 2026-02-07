@@ -17,19 +17,104 @@
 </head>
 
 <style>
+    /* --- NIEUWE STIJLEN VOOR PLAYER PUZZLE --- */
+    
+    /* Achtergrond sfeer */
     .puzzle-wrapper {
-        padding: 0 !important; 
+        position: relative;
         overflow: hidden;      
         display: flex;         
         flex-direction: column;
-        min-height: 350px;     
+        min-height: 400px; /* Iets hoger voor de sfeer */
+        background-color: #f4f4f4;
+        background-image: url('images/puzzle-bg.jpg'); /* Jouw nieuwe plaatje */
+        background-size: cover;
+        background-position: center;
+        border: 4px solid var(--ht-green);
+        border-radius: 8px;
     }
 
-    .start-overlay {
-        flex: 1;              
-        width: 100%;          
-        border-radius: 0;     
-        margin: 0;
+    /* Zorgt dat tekst leesbaar blijft op achtergrond */
+.overlay-bg {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(3px);
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        /* We geven meer ruimte aan de bovenkant: 35px */
+        padding: 35px 20px 20px 20px;
+    }
+
+    /* 1. De Letter Tegels (Scrabble/Rugnummer look) */
+    .word-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        margin: 20px 0;
+    }
+
+    .letter-tile {
+        background: var(--ht-green);
+        color: white;
+        font-size: 1.8em;
+        font-weight: bold;
+        width: 45px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        box-shadow: 0 4px 0 #2A5A29; /* 3D effect onderkant */
+        text-transform: uppercase;
+        animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* 2. Visuele Progressie Balk */
+    .progress-container {
+        width: 100%;
+        height: 10px;
+        background: #ddd;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--ht-green);
+        transition: width 0.5s ease;
+    }
+
+    /* Input veld mooier maken */
+    .puzzle-input {
+        font-family: 'Courier New', Courier, monospace; /* Typemachine look */
+        letter-spacing: 2px;
+        font-weight: bold;
+        text-transform: uppercase;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* Startscherm aanpassingen */
+    .start-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        max-width: 320px;
+        border-top: 5px solid var(--ht-green);
+    }
+
+    .start-image {
+        width: 100%;
+        max-height: 150px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin-bottom: 15px;
     }
 </style>
 
@@ -44,80 +129,76 @@
                 <span id="timerDisplay" class="score-value">0.0s</span>
             </div>
             <div class="score-item">
-                <span class="score-label">Voortgang</span>
-                <span id="progressDisplay" class="score-value">0/5</span>
+                <span class="score-label">Spelers</span>
+                <span id="progressText" class="score-value">0/5</span>
             </div>
         </div>
         
         <div class="btn-group">
-            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">&#127942;</button>
-            <button class="reset-btn" onclick="resetGame()" title="Reset">&#8635;</button>
+            <button class="icon-btn" onclick="openLeaderboard()" title="Topscores">🏆</button>
+            <button class="reset-btn" onclick="resetGame()" title="Reset">↻</button>
         </div>
     </div>
 
     <div class="puzzle-wrapper">
 
-<div id="startScreen" class="start-overlay" style="
-            background-image: url('images/playerpuzzle.png'); 
-            background-size: cover; 
-            background-position: center;
-            width: 100%;
-            height: 100%;
-            min-height: 350px; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        <div id="startScreen" style="
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); z-index: 10;
+            display: flex; justify-content: center; align-items: center;
         ">
-            <div style="
-                background-color: rgba(255, 255, 255, 0.92); 
-                padding: 20px; 
-                border-radius: 12px; 
-                width: 90%; 
-                max-width: 300px; 
-                text-align: center;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-                backdrop-filter: blur(2px); 
-            ">
-                <h2 style="color:var(--ht-green); margin-top: 0; margin-bottom: 5px; font-size: 1.5em;">Potter's Puzzle</h2>
-                <p style="color:#444; margin-bottom: 15px; font-size: 0.95em;">Raad 5 namen zo snel mogelijk!</p>
+            <div class="start-content">
+                <img src="images/puzzle-cover.png" onerror="this.src='images/playerpuzzle.png'" alt="Puzzle" class="start-image">
+                
+                <h2 style="color:var(--ht-green); margin:0;">Scout de Speler</h2>
+                <p style="color:#666; font-size: 0.9em; margin: 10px 0 20px;">De namen op het formulier zijn onleesbaar. Kun jij ontcijferen wie er speelt?</p>
+                
                 <div id="loadingMsg">Namen laden...</div>
-                <button id="startBtn" class="start-btn" onclick="startGame()" style="display:none; width: 100%; font-weight: bold;">START GAME</button>
+                <button id="startBtn" class="big-start-btn" onclick="startGame()" style="display:none; width:100%;">START</button>
             </div>
         </div>
 
-        <div id="gamePlayArea" style="width: 100%; display: none;">
-            <div style="font-size: 0.9em; color:#666; margin-bottom:5px;">Wie is deze speler?</div>
-            <div id="scrambledWord" class="puzzle-word">???</div>
+        <div id="gamePlayArea" class="overlay-bg" style="display: none;">
             
-            <input type="text" id="playerInput" class="puzzle-input" placeholder="Typ de naam..." autocomplete="off">
-            <br>
-            <button class="btn-submit" onclick="checkAnswer()">CHECK</button>
+            <div style="width:100%; display:flex; justify-content:space-between; font-size:0.8em; color:#666; margin-bottom:5px;">
+                <span>Voortgang</span>
+                <span id="levelIndicator">Level 1</span>
+            </div>
+            <div class="progress-container">
+                <div id="progressBar" class="progress-fill"></div>
+            </div>
+
+            <div style="margin-top:20px; font-weight:bold; color:var(--ht-green);">WIE IS DEZE SPELER?</div>
+            
+            <div id="scrambledWordContainer" class="word-container">
+                </div>
+            
+            <input type="text" id="playerInput" class="puzzle-input" placeholder="TYP NAAM..." autocomplete="off">
+            
+            <button class="btn-submit" onclick="checkAnswer()">CONTROLEER</button>
+
+            <div style="margin-top: auto; font-size: 0.8em; color: #888; font-style: italic;">
+                Tip: Druk op Enter om te checken
+            </div>
         </div>
 
-        <div id="winMsg" class="win-message hidden">
-            <h3 style="color:var(--ht-green); margin-top:0;">Puzzel Opgelost!</h3>
-            <p>Je tijd: <span id="finalTime" style="font-weight:bold; font-size:1.2em;">0.0s</span></p>
+        <div id="winMsg" class="win-message hidden" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:90%;">
+            <h3 style="color:var(--ht-green); margin-top:0;">Missie Voltooid! 🕵️‍♂️</h3>
+            <p>Alle namen zijn correct.</p>
+            <p>Je tijd: <span id="finalTime" class="score-value large">0.0s</span></p>
             
-            <div class="input-area">
-                <input type="text" id="playerName" placeholder="Manager Naam" maxlength="15">
+            <div class="input-area" style="margin: 0 auto;">
+                <input type="text" id="playerName" placeholder="Jouw Manager Naam" maxlength="15">
                 <button class="save-btn" id="saveButton" onclick="saveScore()">Opslaan</button>
             </div>
-            <button class="close-btn" style="background:#888;" onclick="resetGame()">Nog een keer</button>
+            <button class="close-btn" style="background:#888; margin-top:10px;" onclick="resetGame()">Opnieuw Spelen</button>
         </div>
-    </div>
-
-    <div class="coach-quote">
-        <strong style="color:var(--ht-green)">Coach:</strong> "Op het formulier staat het een rommeltje, maar op het veld weten ze precies wie ze zijn!"
-    </div>
-    
-    <div class="footer-image">
-        <img src="../runcoffeyrun/schildpad.jpg" alt="Hattrick Icon" style="width: 50px; height: auto;" onerror="this.style.display='none'">
     </div>
 </div>
 
 <div id="leaderboardModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">&#127942; Snelste Puzzelaars</div>
+        <div class="modal-header">🏆 Potter's Puzzle Top 3 🏆</div>
         <ul id="highScoreList" class="highscore-list">
             <li><span>Laden...</span></li>
         </ul>
@@ -141,30 +222,29 @@
     let currentTime = 0;
     let scoreSaved = false;
 
+    // Elementen selecteren
     const startScreen = document.getElementById('startScreen');
     const loadingMsg = document.getElementById('loadingMsg');
     const startBtn = document.getElementById('startBtn');
     const gamePlayArea = document.getElementById('gamePlayArea');
-    const scrambledWordEl = document.getElementById('scrambledWord');
+    const wordContainer = document.getElementById('scrambledWordContainer'); // Aangepast
     const inputEl = document.getElementById('playerInput');
     const timerDisplay = document.getElementById('timerDisplay');
-    const progressDisplay = document.getElementById('progressDisplay');
+    const progressText = document.getElementById('progressText');
     const winMsg = document.getElementById('winMsg');
     const finalTimeSpan = document.getElementById('finalTime');
     const saveBtn = document.getElementById('saveButton');
-    const highScoreList = document.getElementById('highScoreList');
+    const progressBar = document.getElementById('progressBar');
+    const levelIndicator = document.getElementById('levelIndicator');
 
-    // --- OPTIMALISATIE 4: Preload background image ---
+    // Init
     window.addEventListener('DOMContentLoaded', () => {
-        const bgImg = new Image();
-        bgImg.src = 'images/playerpuzzle.png';
-        
         loadingMsg.style.display = 'none';
         startBtn.style.display = 'block';
         openLeaderboard();
     });
 
-    // --- OPTIMALISATIE 3: Fisher-Yates Shuffle ---
+    // Shuffle functie
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -177,23 +257,23 @@
         closeLeaderboard(); 
 
         if (allPlayers.length < maxRounds) {
-            alert("Niet genoeg spelers in de lijst voor een game!");
+            alert("Niet genoeg spelers in de database!");
             return;
         }
 
         solvedCount = 0;
         currentTime = 0;
         scoreSaved = false;
-        timerDisplay.innerText = "0.0s";
-        progressDisplay.innerText = `0/${maxRounds}`;
         
-        // Gebruik de nieuwe shuffle functie
+        timerDisplay.innerText = "0.0s";
+        progressText.innerText = `0/${maxRounds}`;
+        updateProgressBar();
+        
         gameQueue = shuffleArray([...allPlayers]).slice(0, maxRounds);
         
         startScreen.style.display = 'none';
         winMsg.classList.add('hidden');
-        winMsg.style.display = ''; 
-        gamePlayArea.style.display = 'block';
+        gamePlayArea.style.display = 'flex'; // Flex ivm overlay-bg
         inputEl.value = "";
         
         saveBtn.disabled = false;
@@ -212,10 +292,30 @@
             return;
         }
         currentName = gameQueue[solvedCount];
-        scrambledWordEl.innerText = scrambleString(currentName);
+        levelIndicator.innerText = `Speler ${solvedCount + 1}`;
+        
+        // Render de letters als tegels
+        renderTiles(scrambleString(currentName));
+        
         inputEl.value = "";
         inputEl.focus();
         inputEl.classList.remove('wrong', 'correct');
+    }
+
+    // Nieuwe functie: Render HTML tegels
+    function renderTiles(scrambledText) {
+        wordContainer.innerHTML = ''; // Leegmaken
+        const letters = scrambledText.split('');
+        
+        letters.forEach((char, index) => {
+            // Kleine vertraging per letter voor leuk effect
+            setTimeout(() => {
+                const tile = document.createElement('span');
+                tile.classList.add('letter-tile');
+                tile.innerText = char;
+                wordContainer.appendChild(tile);
+            }, index * 50);
+        });
     }
 
     function scrambleString(str) {
@@ -236,19 +336,38 @@
         const correctVal = currentName.toLowerCase();
 
         if (userVal === correctVal) {
+            // GOED
             inputEl.classList.add('correct');
+            
+            // Confetti effect (als effects.js geladen is)
+            if (window.confetti) {
+                confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 }, colors: ['#3D7C3B', '#FFC200'] });
+            }
+
             solvedCount++;
-            progressDisplay.innerText = `${solvedCount}/${maxRounds}`;
+            progressText.innerText = `${solvedCount}/${maxRounds}`;
+            updateProgressBar();
+            
             setTimeout(() => {
                 inputEl.classList.remove('correct');
                 loadNextRound();
-            }, 400); 
+            }, 600); 
         } else {
+            // FOUT
             inputEl.classList.add('wrong');
+            
+            // Schudden
+            inputEl.classList.add('shake-anim'); // Zorg dat deze class in CSS staat
             setTimeout(() => {
                 inputEl.classList.remove('wrong');
-            }, 400);
+                inputEl.classList.remove('shake-anim');
+            }, 500);
         }
+    }
+
+    function updateProgressBar() {
+        const percentage = (solvedCount / maxRounds) * 100;
+        progressBar.style.width = percentage + "%";
     }
 
     inputEl.addEventListener('keypress', function (e) {
@@ -267,8 +386,10 @@
     function endGame() {
         clearInterval(timerInterval);
         finalTimeSpan.innerText = currentTime + "s";
-        winMsg.classList.remove('hidden');
-	HattrickFX.highScore();
+        gamePlayArea.style.display = 'none'; // Verberg spel
+        winMsg.classList.remove('hidden'); // Toon winst
+        
+        if(window.HattrickFX) HattrickFX.highScore(); // Geluidje
     }
 
     function resetGame() {

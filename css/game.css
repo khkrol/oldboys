@@ -178,11 +178,63 @@ body {
     margin-bottom: 25px; max-width: 300px; line-height: 1.4;
 }
 
-/* Leaderboard Lijst */
-.highscore-list { list-style: none; padding: 0; margin: 0 0 15px 0; text-align: left; }
+/* --- LEADERBOARD LIJST (VERNIEUWD) --- */
+.highscore-list { 
+    list-style: none; padding: 0; margin: 0 0 15px 0; 
+    text-align: left; 
+}
+
 .highscore-list li {
-    padding: 8px 0; border-bottom: 1px dotted #eee;
-    display: flex; justify-content: space-between; font-size: 0.85em;
+    padding: 10px 12px; 
+    border-bottom: 1px solid #f0f0f0;
+    display: flex; 
+    align-items: center;
+    font-size: 0.9em;
+    background: #fff;
+    transition: background 0.2s;
+}
+
+.highscore-list li:last-child { border-bottom: none; }
+
+/* Podium Kleuren (Goud, Zilver, Brons subtiele achtergrond) */
+.highscore-list li.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent); }
+.highscore-list li.rank-2 { background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), transparent); }
+.highscore-list li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), transparent); }
+
+/* Kolom 1: Icoontje */
+.hs-rank {
+    width: 30px; 
+    font-size: 1.4em; 
+    text-align: center;
+    margin-right: 8px;
+}
+
+/* Kolom 2: Naam en Datum */
+.hs-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.hs-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1em;
+}
+
+.hs-date {
+    font-size: 0.75em;
+    color: #888;
+    margin-top: 2px;
+}
+
+/* Kolom 3: Score */
+.hs-score {
+    font-weight: bold;
+    color: var(--ht-green);
+    font-size: 1.1em;
+    text-align: right;
+    min-width: 50px;
 }
 
 /* =========================================

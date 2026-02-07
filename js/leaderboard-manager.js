@@ -49,21 +49,21 @@ const LeaderboardManager = {
         });
     },
 
-    // Laad top 10
+    // Laad Top 3 (Weekoverzicht)
     loadTop10: function(collection, listElementId, sortOrder = 'desc', unit = '') {
         if (!db) return;
 
         const listElement = document.getElementById(listElementId);
         if (!listElement) return;
 
-        listElement.innerHTML = '<li><span>Scores laden...</span></li>';
+        listElement.innerHTML = '<li class="loading-state"><span>Data ophalen...</span></li>';
 
         // Filter: Afgelopen 7 dagen
         const now = Date.now();
         const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
         const weekAgo = now - sevenDaysInMs;
 
-        // Eerst proberen met datum filter (hiervoor is soms een 'index' nodig in Firebase)
+        // Eerst proberen met datum filter
         db.collection(collection)
             .where("date", ">", weekAgo)
             .get()
@@ -74,37 +74,38 @@ const LeaderboardManager = {
                 });
 
                 if (scores.length === 0) {
-                    // Als er deze week geen scores zijn, laat dan de "All Time" scores zien
+                    // Geen scores deze week? Toon Top 3 Aller Tijden
                     this.loadFallback(collection, listElement, sortOrder, unit);
                     return;
                 }
 
-                // Sorteren in Javascript (veilig en snel voor kleine lijsten)
+                // Sorteren
                 scores.sort((a, b) => {
                     return sortOrder === 'asc' ? a.score - b.score : b.score - a.score;
                 });
 
-                this.renderList(scores.slice(0, 10), listElement, unit);
+                // Pak alleen de top 3
+                this.renderList(scores.slice(0, 3), listElement, unit);
             })
             .catch((error) => {
-                // Als de query faalt (bijv. door missende index), val terug op simpele laad-actie
+                // Als index mist of query faalt, fallback
                 console.log("Slimme query mislukt, schakel over op fallback...", error);
                 this.loadFallback(collection, listElement, sortOrder, unit);
             });
     },
 
-    // Fallback: Haal gewoon de laatste scores op zonder datum filter
+    // Fallback: Haal Top 3 op zonder datum filter
     loadFallback: function(collection, listElement, sortOrder, unit) {
         db.collection(collection)
             .orderBy("score", sortOrder)
-            .limit(10)
+            .limit(3) // LIMIT AANGEPAST NAAR 3
             .get()
             .then((querySnapshot) => {
                 let scores = [];
                 querySnapshot.forEach((doc) => scores.push(doc.data()));
                 
                 if (scores.length === 0) {
-                    listElement.innerHTML = '<li><span>Nog geen scores!</span></li>';
+                    listElement.innerHTML = '<li class="empty-state"><span>Nog geen scores!</span></li>';
                 } else {
                     this.renderList(scores, listElement, unit);
                 }
@@ -115,32 +116,43 @@ const LeaderboardManager = {
             });
     },
 
-    // HTML maken
+    // HTML maken voor Top 3
     renderList: function(scores, listElement, unit) {
         listElement.innerHTML = '';
+        
+        const medals = ["🥇", "🥈", "🥉"];
+
         scores.forEach((item, index) => {
             const li = document.createElement('li');
-            
-            // Datum netjes maken
-            let dateStr = "-";
+            li.classList.add(`rank-${index + 1}`); // Voor CSS styling (goud/zilver/brons)
+
+            // Datum formatteren: "Vr 14:30"
+            let dateStr = "";
             if (item.date) {
                 const dateObj = new Date(item.date);
-                dateStr = dateObj.toLocaleDateString('nl-NL', {day: '2-digit', month: '2-digit'});
+                // Dag naam kort (Ma, Di, etc)
+                const day = dateObj.toLocaleDateString('nl-NL', { weekday: 'short' }); 
+                // Tijd (14:30)
+                const time = dateObj.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+                dateStr = `${day} ${time}`;
             }
-            
-            // Score afronden als het een kommagetal is (voor tijden)
+
+            // Score afronden als het decimalen heeft
             let displayScore = item.score;
             if (typeof item.score === 'number' && item.score % 1 !== 0) {
                 displayScore = item.score.toFixed(2);
             }
 
+            // De medaille kiezen (of nummer als we ooit meer dan 3 tonen)
+            const rankIcon = medals[index] || `#${index + 1}`;
+
             li.innerHTML = `
-                <span style="font-weight:bold; color:var(--ht-green); width:20px;">#${index + 1}</span>
-                <div style="flex:1; margin-left:10px; display:flex; flex-direction:column;">
-                    <span style="font-weight:bold;">${item.name}</span>
-                    <span style="font-size:0.75em; color:#888;">${dateStr}</span>
+                <div class="hs-rank">${rankIcon}</div>
+                <div class="hs-info">
+                    <span class="hs-name">${item.name}</span>
+                    <span class="hs-date">${dateStr}</span>
                 </div>
-                <span style="font-weight:bold">${displayScore}${unit}</span>
+                <div class="hs-score">${displayScore}${unit}</div>
             `;
             listElement.appendChild(li);
         });
