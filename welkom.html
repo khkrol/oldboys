@@ -43,7 +43,6 @@
             height: auto;
             display: block;
             margin: 0 auto 10px auto;
-            /* AANGEPAST: border-radius en box-shadow verwijderd */
             border: none; 
         }
 
@@ -91,6 +90,36 @@
             display: block;
             margin: 20px auto 0 auto;
         }
+
+        /* Styling voor het versienummer */
+        .version-footer {
+            text-align: center;
+            font-size: 0.7em;
+            color: #999;
+            margin-top: 10px;
+            padding-bottom: 20px;
+            font-family: sans-serif;
+        }
+
+        /* Extra styling voor instructie lijstjes in de modal */
+        .install-list {
+            text-align: left;
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 3px solid #eee;
+        }
+        .install-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+            display: block;
+            color: var(--ht-text);
+        }
+        .install-step {
+            display: block;
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 2px;
+        }
     </style>
 </head>
 <body>
@@ -101,7 +130,10 @@
             <img src="assets/images/logo.png" alt="Hattrick" class="ht-logo">
             <img src="assets/images/potters.jpg" alt="Potters" class="pob-logo">
         </div>
-        <h1>Bestuurskamer</h1>
+        <h1>
+            Bestuurskamer 
+            <button class="info-btn" onclick="openModal()" title="Installatie instructies">i</button>
+        </h1>
     </div>
 
     <div class="intro-text">
@@ -130,8 +162,52 @@
     </div>
 
     <img src="assets/images/jack.jpg" alt="Jack Daniels" class="bottle-image">
+    
+    <div class="version-footer">Versie 1.0 - 7 februari 2026</div>
 
 </div>
+
+<div id="installModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">App Installeren</div>
+        
+        <p style="margin-bottom: 20px; font-size: 0.95em;">
+            Installeer de PFG app op je telefoon voor volledig scherm en offline gebruik.
+        </p>
+
+        <div class="install-list" style="border-left-color: #3DDC84;">
+            <span class="install-title">🤖 Android (Chrome)</span>
+            <span class="install-step">1. Tik rechtsboven op de drie puntjes (⋮).</span>
+            <span class="install-step">2. Kies <strong>"App installeren"</strong> of "Toevoegen aan startscherm".</span>
+        </div>
+
+        <div class="install-list" style="border-left-color: #000000;">
+            <span class="install-title">🍎 iOS (Safari)</span>
+            <span class="install-step">1. Tik onderin op de <strong>"Delen"</strong> knop (vierkantje met pijl).</span>
+            <span class="install-step">2. Scroll naar beneden en kies <strong>"Zet op beginscherm"</strong>.</span>
+        </div>
+        
+        <button class="close-btn" onclick="closeModal()">Begrepen</button>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('installModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('installModal').style.display = 'none';
+    }
+
+    // Sluit de modal ook als je naast de box klikt
+    window.onclick = function(event) {
+        var modal = document.getElementById('installModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 
 </body>
 </html>

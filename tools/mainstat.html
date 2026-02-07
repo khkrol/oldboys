@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kliko's Scoutingsbureau</title>
+    
+    <link rel="apple-touch-icon" href="../assets/images/potters.jpg">
+    <link rel="icon" href="../assets/images/potters.jpg">
+    <link rel="manifest" href="../manifest.json">
+    <meta name="theme-color" content="#3D7C3B">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/tools.css">
+
+    <style>
+        /* Specifieke styling voor deze tool */
+        .scout-result-text { font-size: 0.9em; color: #555; margin-top: 5px; font-style: italic; }
+        .skill-range { font-size: 1.4em; font-weight: bold; color: var(--ht-green); }
+        .checkbox-wrapper { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 10px; background: #f4f4f4; border-radius: 8px; }
+        .checkbox-wrapper input { width: 20px; height: 20px; accent-color: var(--ht-green); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="logo-container">
+            <img src="../assets/images/logo.png" alt="Hattrick Logo" class="ht-logo">
+            <img src="../assets/images/potters.jpg" alt="Potter's Old Boys Logo" class="pob-logo">
+        </div>
+        <h1>Hoofdskill Scout</h1>
+    </div>
+
+    <div class="character-display">
+        <img src="images/kliko.jpg" alt="Kiko Droessaert" class="character-photo">
+        <div class="quote-wrapper">
+            <div class="quote-box" id="klikoQuote">
+                <div>
+                    <span class="name-tag">Kiko 'de Kliko':</span>
+                    <button class="info-btn" onclick="MainStatScout.toggleModal()">i</button>
+                </div>
+                "Ik graaf door de cijfers die de tegenstander probeert te verbergen. Wat verdient die gozer?"
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Positie (Hoofdskill)</label>
+        <select id="position">
+            <option value="IM">Middenvelder (Spelmaken)</option>
+            <option value="CD">Verdediger (Verdedigen)</option>
+            <option value="Winger">Vleugelspeler (Vleugelspel)</option>
+            <option value="Fwd">Aanvaller (Scoren)</option>
+        </select>
+    </div>
+
+    <div class="input-group row-2">
+        <div>
+            <label>Leeftijd</label>
+            <input type="number" id="age" value="24" min="17" max="50">
+        </div>
+        <div>
+            <label>Salaris (€)</label>
+            <input type="number" id="salary" placeholder="Bijv. 15000" step="10">
+        </div>
+    </div>
+
+    <div class="checkbox-wrapper">
+        <input type="checkbox" id="specialty">
+        <label for="specialty" style="margin:0; font-weight:normal;">Heeft Specialiteit (Snel, Kop, etc.)</label>
+    </div>
+
+    <hr style="margin: 15px 0; border:0; border-top:1px solid #eee;">
+    <p style="font-size:0.8em; color:#666; margin-bottom:10px;">Optioneel: Voor training check</p>
+
+    <div class="input-group row-3">
+        <div>
+            <label>TSI</label>
+            <input type="number" id="tsi" placeholder="Optioneel">
+        </div>
+        <div>
+            <label>Vorm</label>
+            <select id="form">
+                <option value="4">4 - Zwak</option>
+                <option value="5">5 - Matig</option>
+                <option value="6" selected>6 - Redelijk</option>
+                <option value="7">7 - Goed</option>
+                <option value="8">8 - Uitstekend</option>
+            </select>
+        </div>
+        <div>
+            <label>Conditie</label>
+            <select id="stamina">
+                <option value="5">5 - Matig</option>
+                <option value="6">6 - Redelijk</option>
+                <option value="7" selected>7 - Goed</option>
+                <option value="8">8 - Uitstekend</option>
+                <option value="9">9 - Pui.</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn-primary" onclick="MainStatScout.calculate()">Analyseer Speler</button>
+
+    <div id="resultsArea" class="hidden">
+        <div class="results-container">
+            <div class="result-box primary" id="boxWage">
+                <div class="label-small">Salaris Basis</div>
+                <div class="skill-range" id="wageResult">-</div>
+                <div class="val-sub" id="wageLabel">Niveau</div>
+            </div>
+
+            <div class="result-box secondary" id="boxTsi">
+                <div class="label-small">TSI Potentieel</div>
+                <div class="val-large" id="tsiResult">-</div>
+                <div class="val-sub">Indien Vorm/Conditie klopt</div>
+            </div>
+        </div>
+        
+        <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-top:15px; border-left:4px solid var(--ht-green);">
+            <strong>Kiko's Analyse:</strong>
+            <p id="analysisText" class="scout-result-text">Vul de gegevens in...</p>
+        </div>
+    </div>
+
+</div>
+
+<div id="infoModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">Hoe werkt de Scout?</div>
+        <p>Deze tool 'reverse engineered' de hoofdskill op basis van het salaris.</p>
+        <ul style="text-align:left; font-size:0.9em;">
+            <li><strong>Alleen Veldspelers:</strong> Keepers hebben een compleet andere formule en werken hier niet.</li>
+            <li><strong>Salaris Anker:</strong> Salaris verandert alleen op verjaardagen. Dit is de 'harde' ondergrens[cite: 346].</li>
+            <li><strong>Leeftijdscorrectie:</strong> Vanaf 29 jaar daalt het salaris kunstmatig. De tool rekent dit terug om de echte skill te vinden[cite: 372].</li>
+            <li><strong>TSI Check:</strong> TSI verandert wekelijks. Als de TSI-skill veel hoger is dan de Salaris-skill, heeft de speler recent getraind[cite: 457].</li>
+        </ul>
+        <button class="close-btn" onclick="MainStatScout.toggleModal()">Sluiten</button>
+    </div>
+</div>
+
+<script src="js/mainstat.js"></script>
+
+</body>
+</html>

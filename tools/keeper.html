@@ -3,31 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Keeper Scout - Potter's Old Boys</title>
+    <title>Keeper Scout 3.0 - Potter's Old Boys</title>
     
     <link rel="apple-touch-icon" href="../assets/images/potters.jpg">
     <link rel="icon" href="../assets/images/potters.jpg">
-    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#3D7C3B">
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/tools.css">
+
 
     <style>
-        /* Specifieke stijlen voor de Keeper tool */
         .formula-box {
             background: #f4f4f4;
             padding: 10px;
             border-radius: 5px;
             font-family: monospace;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-            border-left: 4px solid var(--ht-yellow);
+            font-size: 0.85em;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--ht-yellow, #ffd700);
             color: #333;
         }
-        
-        /* Kleine helper voor de debug regels */
-        .val-detail { font-size: 0.9em; margin-top: 5px; }
+        .checkbox-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            background: rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+        .checkbox-item input {
+            margin-right: 8px;
+            width: 20px;
+            height: 20px;
+        }
+        .debug-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            color: #555;
+            margin-top: 4px;
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 2px;
+        }
+        .debug-val { font-weight: bold; font-family: monospace; }
     </style>
 </head>
 <body>
@@ -36,7 +61,7 @@
     <div class="header">
         <div class="logo-container">
             <img src="../assets/images/logo.png" alt="Hattrick Logo" class="ht-logo">
-            <img src="../assets/images/potters.jpg" alt="Potter's Old Boys Logo" class="pob-logo">
+            <img src="../assets/images/potters.jpg" alt="P.O.B. Logo" class="pob-logo">
         </div>
         <h1>Keeper Scout</h1>
     </div>
@@ -49,32 +74,31 @@
                     <span class="name-tag">Davey Vader:</span>
                     <button class="info-btn" onclick="openModal()">i</button>
                 </div>
-                "Ik vind je gebrek aan keeperskwaliteiten... stuitend."
+                "Ik vind je gebrek aan TSI-exponent kennis... stuitend."
             </div>
         </div>
     </div>
 
     <div class="input-group">
         <label>Salaris (€)</label>
-        <div class="range-info" style="text-align:left; margin-bottom:5px;">Basissalaris (zonder 20% buitenland bonus).</div>
-        <input type="number" id="salaris" placeholder="Bijv. 3500" oninput="berekenKeeper()">
+        <div class="range-info" style="text-align:left;">Huidig salaris (incl. bonussen)</div>
+        <input type="number" id="salaris" placeholder="Bijv. 12500" inputmode="numeric">
     </div>
 
     <div class="input-group">
         <label>TSI (Total Skill Index)</label>
-        <input type="number" id="tsi" placeholder="Bijv. 2100" oninput="berekenKeeper()">
-    </div>
-
-    <div class="input-group">
-        <label>Leeftijd (Jaren)</label>
-        <input type="number" id="leeftijdJaren" placeholder="Bijv. 17" value="17" oninput="berekenKeeper()">
+        <input type="number" id="tsi" placeholder="Bijv. 8400" inputmode="numeric">
     </div>
 
     <div class="input-group">
         <div class="row-2">
             <div>
+                <label>Leeftijd</label>
+                <input type="number" id="leeftijd" value="17" inputmode="numeric">
+            </div>
+            <div>
                 <label>Vorm</label>
-                <select id="vorm" onchange="berekenKeeper()">
+                <select id="vorm">
                     <option value="1">1. Rampzalig</option>
                     <option value="2">2. Slecht</option>
                     <option value="3">3. Waardeloos</option>
@@ -85,19 +109,34 @@
                     <option value="8">8. Uitstekend</option>
                 </select>
             </div>
-            <div>
-                <label>Conditie</label>
-                <select id="conditie" onchange="berekenKeeper()">
-                    <option value="1">1. Rampzalig</option>
-                    <option value="2">2. Slecht</option>
-                    <option value="3">3. Waardeloos</option>
-                    <option value="4">4. Zwak</option>
-                    <option value="5" selected>5. Matig</option>
-                    <option value="6">6. Redelijk</option>
-                    <option value="7">7. Goed</option>
-                    <option value="8">8. Uitstekend</option>
-                    <option value="9">9. Formidabel</option>
-                </select>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Extra Parameters</label>
+        <div class="range-info">Noodzakelijk voor correcte loon-analyse</div>
+        
+        <div style="margin-top:5px; margin-bottom:10px;">
+            <label style="font-size:0.9em;">Spelhervatten Niveau</label>
+            <select id="spelhervatten">
+                <option value="1">1-3 (Laag)</option>
+                <option value="5">5 (Matig)</option>
+                <option value="7">7 (Goed)</option>
+                <option value="10">10 (Uitmuntend)</option>
+                <option value="13">13 (Wereldklasse)</option>
+                <option value="15">15 (Titanisch+)</option>
+                <option value="20">20 (Goddelijk)</option>
+            </select>
+        </div>
+
+        <div class="checkbox-group">
+            <div class="checkbox-item">
+                <input type="checkbox" id="isBuitenlander">
+                <span>Buitenlander? (+20%)</span>
+            </div>
+            <div class="checkbox-item">
+                <input type="checkbox" id="heeftSpecialiteit">
+                <span>Specialiteit? (+10%)</span>
             </div>
         </div>
     </div>
@@ -110,126 +149,43 @@
         </div>
 
         <div class="result-box secondary">
-            <div class="label-small">Analyse</div>
-            <div class="val-detail" style="margin-top:10px;">Sal Skill: <span id="debugSal" class="text-bold">-</span></div>
-            <div class="val-detail">TSI Skill: <span id="debugTsi" class="text-bold">-</span></div>
+            <div class="label-small">Data Analyse</div>
+            <div class="debug-row">
+                <span>Salaris Skill:</span> <span id="debugSal" class="debug-val">-</span>
+            </div>
+            <div class="debug-row">
+                <span>TSI Skill:</span> <span id="debugTsi" class="debug-val">-</span>
+            </div>
+            <div class="debug-row" style="border:none;">
+                <span>Schatting:</span> <span id="debugConf" class="debug-val">-</span>
+            </div>
         </div>
     </div>
-
 </div>
 
 <div id="infoModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">Davey's Scout Methode (v2.4)</div>
+        <div class="modal-header">Scout Logica v3.0</div>
         
-        <p><strong>1. De "Floor" Regel</strong><br>
-        Hattrick rondt niet af naar boven. Een skill van 7.9 is in het spel nog steeds 7 (Goed). Davey rondt daarom veilig af naar beneden.</p>
-
-        <p><strong>2. Salaris Check</strong><br>
-        Salarissen stijgen exponentieel. Bij talenten (17 t/m 21 jaar) is het salaris vaak kunstmatig laag, dus pas ik een correctie toe.</p>
+        <p><strong>Multi-Factoriale Convergentie</strong></p>
+        <p>Deze tool gebruikt geavanceerde formules om het salaris "schoon" te maken van bonussen.</p>
         
-        <p><strong>3. TSI Check</strong><br>
-        Ik haal eerst de invloed van Vorm en Conditie uit de TSI. Daarna gebruik ik deze formule:</p>
-        <div class="formula-box">Skill ≈ (Kale TSI / 4) ^ (1 / 3.3)</div>
+        <div class="formula-box">
+            TSI = 3 * GK^3.359 * Vorm^0.5
+        </div>
 
-        <p><strong>4. De Weging (Jonkies vs Oudere garde)</strong><br>
-        Bij <strong>jonkies (17 t/m 21 jaar)</strong> vertrouw ik de TSI voor 70%. Bij de oudere garde (22+) is het salaris betrouwbaarder (60% weging).</p>
+        <ul style="padding-left:20px; font-size:0.9em; line-height:1.6;">
+            <li>Correctie voor buitenlandbonus (20%)</li>
+            <li>Correctie voor specialiteitbonus (10%)</li>
+            <li>Correctie voor Spelhervatten (0.25% p/n)</li>
+            <li>Nieuwe TSI Exponent: 3.359</li>
+        </ul>
 
         <button class="close-btn" onclick="closeModal()">Begrepen</button>
     </div>
 </div>
 
-<script>
-    const niveaus = [
-        "Niet bestaand (0)", "Rampzalig (1)", "Slecht (2)", "Waardeloos (3)", 
-        "Zwak (4)", "Matig (5)", "Redelijk (6)", "Goed (7)", 
-        "Uitstekend (8)", "Formidabel (9)", "Uitmuntend (10)", "Briljant (11)", 
-        "Wereldklasse (12)", "Buitenaards (13)", "Mythisch (14)", "Magisch (15)", 
-        "Utopisch (16)", "Goddelijk (17)", "Goddelijk+1 (18)", "Goddelijk+2 (19)", "MAX (20)"
-    ];
-
-    function berekenKeeper() {
-        let salaris = parseFloat(document.getElementById('salaris').value) || 0;
-        let tsi = parseFloat(document.getElementById('tsi').value) || 0;
-        let form = parseInt(document.getElementById('vorm').value);
-        let stamina = parseInt(document.getElementById('conditie').value);
-        let ageYears = parseInt(document.getElementById('leeftijdJaren').value) || 17;
-        
-        const SALARIS_OFFSET = 250; 
-        
-        // STAP 1: SALARIS
-        let skillSal = 0;
-        if (salaris > SALARIS_OFFSET) {
-            let rawSkill = Math.log(salaris / SALARIS_OFFSET) / Math.log(1.26);
-            
-            let ageCorrection = 0;
-            if (ageYears < 19) {
-                ageCorrection = 1.5; 
-            } else if (ageYears < 21) {
-                ageCorrection = 0.8; 
-            } else if (ageYears > 28) {
-                ageCorrection = -0.5; 
-            }
-            
-            skillSal = rawSkill + ageCorrection;
-        }
-
-        // STAP 2: TSI
-        const vormMap = {
-            1: 0.15, 2: 0.30, 3: 0.48, 4: 0.68, 
-            5: 1.00, 6: 1.45, 7: 2.15, 8: 3.20 
-        };
-        const condMap = {
-            1: 0.60, 2: 0.70, 3: 0.80, 4: 0.90, 
-            5: 0.95, 6: 1.00, 7: 1.03, 8: 1.05, 9: 1.06
-        };
-
-        let fVorm = vormMap[form] || 1.0;
-        let fCond = condMap[stamina] || 1.0;
-
-        let kaleTsi = tsi / (fVorm * fCond);
-        
-        let skillTsi = 0;
-        if (kaleTsi > 10) {
-             skillTsi = Math.pow(kaleTsi / 4, 1/3.3);
-        }
-
-        // STAP 3: FUSIE
-        let finalSkill = 0;
-        
-        if (salaris > 0 && tsi > 0) {
-            if (ageYears <= 21) {
-                finalSkill = (skillSal * 0.3) + (skillTsi * 0.7);
-            } else {
-                finalSkill = (skillSal * 0.6) + (skillTsi * 0.4);
-            }
-        } else if (salaris > 0) {
-            finalSkill = skillSal;
-        } else if (tsi > 0) {
-            finalSkill = skillTsi;
-        }
-
-        // OUTPUT
-        if (finalSkill < 0) finalSkill = 0;
-
-        let displaySkill = finalSkill.toFixed(2);
-        let intSkill = Math.floor(finalSkill); 
-
-        if (intSkill < 0) intSkill = 0;
-        if (intSkill > 20) intSkill = 20;
-
-        document.getElementById('resLevel').innerText = displaySkill;
-        document.getElementById('resNaam').innerText = niveaus[intSkill];
-
-        document.getElementById('debugSal').innerText = skillSal > 0 ? skillSal.toFixed(2) : "-";
-        document.getElementById('debugTsi').innerText = skillTsi > 0 ? skillTsi.toFixed(2) : "-";
-    }
-
-    function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
-    function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
-    
-document.addEventListener('DOMContentLoaded', berekenKeeper);
-</script>
+<script src="js/keeper.js"></script>
 
 </body>
 </html>

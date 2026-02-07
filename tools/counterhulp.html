@@ -12,6 +12,7 @@
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/tools.css">
 
     <style>
         /* Specifieke stijlen voor de tabellen in de Counterhulp */
@@ -80,7 +81,7 @@
                 <input type="number" id="mid_self" value="20" oninput="bereken()">
             </div>
             <div>
-                <label>Midfield tegenst.</label>
+                <label>Midfield tegenstander</label>
                 <input type="number" id="mid_opp" value="25" oninput="bereken()">
             </div>
         </div>
@@ -300,7 +301,7 @@
         } else if (deltaXg <= 0) {
             adviesZinHTML = "Counteren levert <span class='highlight'>geen voordeel</span> op. Je verliest meer kansen dan je wint.";
         } else {
-            adviesZinHTML = `De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()}</span>. Counteren levert je een tactisch voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>.`;
+            adviesZinHTML = `"De effectiviteit is <span class="highlight">${adviesLabel.toLowerCase()}</span>. Counteren levert je een tactisch voordeel op van <span class="highlight">${deltaXg.toFixed(2)} xG</span>."`;
         }
 
         document.getElementById('ratingVal').innerText = ratingIndex + "/20";

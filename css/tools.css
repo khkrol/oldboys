@@ -1,0 +1,410 @@
+/* =========================================
+   1. CONFIGURATIE & VARIABELEN
+   ========================================= */
+:root {
+    /* Mastermind Kleuren */
+    --pin-1: #d9534f; --pin-2: #3D7C3B; --pin-3: #FFC200;
+    --pin-4: #0275d8; --pin-5: #f0ad4e; --pin-6: #6f42c1;
+    --hole: #e0e0e0;
+    
+    /* UI Variabelen (geleend uit global.css context voor fallback) */
+    --ht-green: #3D7C3B;
+    --ht-yellow: #FFC200;
+    --radius: 8px;
+}
+
+body {
+    overflow-x: hidden;
+    touch-action: manipulation;
+}
+
+/* =========================================
+   2. ALGEMENE ANIMATIES
+   ========================================= */
+@keyframes pulse { 
+    0% { transform: scale(1); } 
+    50% { transform: scale(1.05); } 
+    100% { transform: scale(1); } 
+}
+
+@keyframes slideUpFade {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.hidden { display: none !important; }
+
+/* =========================================
+   3. UI COMPONENTEN (Gedeeld)
+   ========================================= */
+
+/* --- SCOREBORD --- */
+.score-board {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9f9f9;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-left: 4px solid var(--ht-yellow);
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.score-group { display: flex; gap: 15px; }
+.score-item { display: flex; flex-direction: column; }
+.score-label { font-size: 0.65em; font-weight: bold; text-transform: uppercase; color: #666; }
+.score-value { font-size: 1em; font-weight: bold; color: var(--ht-green); }
+.score-value.large { font-size: 1.1em; }
+
+/* --- KNOPPEN (TIP 2: TACTIELE FEEDBACK) --- */
+.btn-group { display: flex; gap: 8px; }
+
+/* Algemene stijl voor alle actieknoppen */
+.reset-btn, .icon-btn, .save-btn, .close-msg-btn, .check-btn, .close-btn, .big-start-btn, .btn-submit {
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.1s ease;
+    /* De 3D rand */
+    border-bottom: 4px solid rgba(0,0,0,0.2); 
+}
+
+/* Indrukken effect */
+.reset-btn:active, .icon-btn:active, .save-btn:active, .close-msg-btn:active, 
+.check-btn:active, .close-btn:active, .big-start-btn:active, .btn-submit:active {
+    transform: translateY(4px); /* Knop gaat omlaag */
+    border-bottom-width: 0px;   /* Rand verdwijnt */
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); /* Schaduw binnenin */
+}
+
+/* Specifieke knop stijlen */
+.reset-btn, .icon-btn {
+    background-color: var(--ht-green); color: white;
+    width: 36px; height: 36px; border-radius: 4px;
+    font-size: 1.2em; display: flex;
+    justify-content: center; align-items: center;
+}
+.icon-btn { background-color: var(--ht-yellow); color: #333; }
+.icon-btn:hover { background-color: #e0a800; }
+
+.save-btn, .close-msg-btn, .check-btn, .close-btn, .btn-submit {
+    background: var(--ht-green); color: white;
+    padding: 12px; border-radius: 4px; width: 100%;
+}
+.close-msg-btn { background: #888; }
+.check-btn:disabled { 
+    background-color: #ccc; 
+    cursor: not-allowed; 
+    transform: none; 
+    border-bottom-color: #999; 
+}
+.btn-submit { margin-top: 10px; } /* Specifiek voor puzzle */
+
+.big-start-btn {
+    background-color: var(--ht-green); color: white;
+    padding: 15px 40px; border-radius: 50px;
+    font-size: 1.3em;
+    box-shadow: 0 4px 15px rgba(61, 124, 59, 0.3);
+    animation: pulse 2s infinite;
+}
+/* Stop pulse bij hover zodat de border-bottom zichtbaar blijft */
+.big-start-btn:hover { animation: none; transform: translateY(-2px); } 
+.big-start-btn:active { animation: none; transform: translateY(4px); }
+
+
+/* --- INPUT VELDEN IN GAMES --- */
+.input-area { width: 100%; max-width: 250px; margin: 10px 0; }
+.input-area input {
+    width: 100%; padding: 12px; border: 2px solid #ddd;
+    border-radius: 4px; text-align: center; font-size: 1.1em;
+}
+
+/* =========================================
+   4. MODALS & OVERLAYS (TIP 5: ZACHTERE LOOK)
+   ========================================= */
+.game-overlay, .modal {
+    position: fixed; /* Zorgt dat het altijd beeldvullend is */
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1000;
+    
+    /* TIP 5: Backdrop Filter & Transparantie */
+    background: rgba(0, 0, 0, 0.4); 
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Inhoud van de modals en overlays */
+.game-overlay { 
+    position: absolute; /* Overlays blijven binnen de container, Modals zijn fixed */
+    background: rgba(255, 255, 255, 0.96); /* Overlay blijft wel grotendeels wit */
+    text-align: center;
+    border-radius: var(--radius);
+    z-index: 100; 
+}
+
+.modal-content, .win-message {
+    background-color: white; 
+    padding: 25px; 
+    border-radius: 8px;
+    width: 100%; max-width: 350px; 
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    
+    /* TIP 5: Slide Up Animatie */
+    animation: slideUpFade 0.3s ease-out;
+}
+
+/* Overlay Typografie */
+.overlay-title {
+    color: var(--ht-green); font-size: 1.8em;
+    margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
+}
+.overlay-text {
+    color: #555; font-size: 1em;
+    margin-bottom: 25px; max-width: 300px; line-height: 1.4;
+}
+
+/* --- LEADERBOARD LIJST (VERNIEUWD) --- */
+.highscore-list { 
+    list-style: none; padding: 0; margin: 0 0 15px 0; 
+    text-align: left; 
+}
+
+.highscore-list li {
+    padding: 10px 12px; 
+    border-bottom: 1px solid #f0f0f0;
+    display: flex; 
+    align-items: center;
+    font-size: 0.9em;
+    background: #fff;
+    transition: background 0.2s;
+}
+
+.highscore-list li:last-child { border-bottom: none; }
+
+/* Podium Kleuren (Goud, Zilver, Brons subtiele achtergrond) */
+.highscore-list li.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent); }
+.highscore-list li.rank-2 { background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), transparent); }
+.highscore-list li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), transparent); }
+
+/* Kolom 1: Icoontje */
+.hs-rank {
+    width: 30px; 
+    font-size: 1.4em; 
+    text-align: center;
+    margin-right: 8px;
+}
+
+/* Kolom 2: Naam en Datum */
+.hs-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.hs-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1em;
+}
+
+.hs-date {
+    font-size: 0.75em;
+    color: #888;
+    margin-top: 2px;
+}
+
+/* Kolom 3: Score */
+.hs-score {
+    font-weight: bold;
+    color: var(--ht-green);
+    font-size: 1.1em;
+    text-align: right;
+    min-width: 50px;
+}
+
+/* =========================================
+   5. GAME: RUN COFFIE RUN
+   ========================================= */
+.runner-wrapper {
+    position: relative; width: 100%; height: 300px;
+    background-color: white; border: 2px solid var(--ht-green);
+    border-radius: 4px; overflow: hidden; margin-bottom: 5px; cursor: pointer;
+}
+.track {
+    position: absolute; bottom: 0; width: 100%; height: 40px;
+    background: repeating-linear-gradient(45deg, var(--ht-green), var(--ht-green) 10px, #2A5A29 10px, #2A5A29 20px);
+    border-top: 4px solid white; 
+}
+#coffey { position: absolute; bottom: 40px; left: 30px; width: 60px; height: 90px; z-index: 10; }
+#coffey img, .obstacle img { width: 100%; height: 100%; object-fit: contain; }
+.obstacle { position: absolute; bottom: 40px; width: 60px; height: 45px; z-index: 15; }
+.runner-wrapper {
+    /* Voeg een achtergrond afbeelding toe */
+    background-image: url('images/clouds-bg.png'); 
+    background-repeat: repeat-x;
+    background-position: 0 bottom;
+    background-size: auto 100%;
+    /* De JS zorgt voor de beweging */
+}
+
+/* =========================================
+   6. GAME: POTTER'S PUZZLE
+   ========================================= */
+.puzzle-wrapper {
+    position: relative; width: 100%; min-height: 300px;
+    background-color: white; border: 2px solid var(--ht-green);
+    border-radius: 4px; overflow: hidden; margin-bottom: 5px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+}
+.puzzle-word { font-size: 2em; font-weight: bold; color: var(--ht-green); margin-bottom: 20px; letter-spacing: 3px; }
+.puzzle-input { width: 80%; padding: 12px; font-size: 1.2em; text-align: center; border: 2px solid #ccc; border-radius: 5px; margin-bottom: 15px; }
+.puzzle-input.wrong { border-color: var(--red-alert); background-color: #fff0f0; }
+.puzzle-input.correct { border-color: var(--ht-green); background-color: #f0fff4; }
+
+/* =========================================
+   7. GAME: MEMORY
+   ========================================= */
+.game-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; perspective: 1000px; min-height: 200px; }
+.card { aspect-ratio: 3/4; cursor: pointer; position: relative; transform-style: preserve-3d; transition: transform 0.3s; }
+.card.flipped { transform: rotateY(180deg); }
+.card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+.card-front { background: var(--ht-green); border: 2px solid var(--ht-yellow); color: var(--ht-yellow); font-size: 1.5em; }
+.card-back { background: white; transform: rotateY(180deg); }
+.card-back img { width: 100%; height: 100%; object-fit: cover; }
+.player-info { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); color: white; font-size: 9px; text-align: center; }
+
+/* Responsive fix voor Memory */
+@media (min-width: 768px) {
+    .app-container.wide-game { max-width: 800px; }
+    .wide-game .game-grid { grid-template-columns: repeat(6, 1fr); gap: 10px; }
+    .wide-game .card-front { font-size: 2em; }
+}
+
+/* =========================================
+   8. GAME: MASTERMIND
+   ========================================= */
+.game-board-mastermind { 
+    flex: 1; 
+    background: #f0f0f0; 
+    border-radius: 8px; padding: 10px; margin-bottom: 15px; 
+    min-height: 300px; overflow-y: auto; 
+    border: 1px solid #ccc; 
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+.board-row { 
+    display: flex; align-items: center; padding: 8px 0; 
+    border-bottom: 1px solid #e0e0e0; 
+}
+
+.guess-slots { flex: 3; display: flex; justify-content: space-around; }
+
+/* Feedback gebied */
+.feedback-slots { 
+    flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; 
+    background: rgba(0,0,0,0.05); padding: 4px; border-radius: 4px; 
+    box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+.small-pin { 
+    width: 10px; height: 10px; border-radius: 50%; 
+    background: #ccc; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.3);
+}
+.small-pin.exact { 
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b); 
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+} 
+.small-pin.color { 
+    background: radial-gradient(circle at 30% 30%, #ffffff, #b0b0b0); 
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.3); border: none;
+}
+
+/* Controls Area */
+.controls-area { border-top: 2px solid var(--ht-green); padding-top: 15px; background: white; }
+
+.current-guess-row { 
+    display: flex; justify-content: space-between; margin-bottom: 15px; 
+    background: #fff; padding: 10px; border-radius: 8px; 
+    border: 2px solid var(--ht-green);
+    box-shadow: 0 0 15px rgba(61, 124, 59, 0.2);
+    transform: scale(1.01); transition: all 0.3s ease;
+}
+
+.color-picker { display: flex; justify-content: space-between; gap: 5px; }
+
+/* Pinnen en Sockets */
+.pin-socket { 
+    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+    cursor: pointer; color: white; font-weight: bold; font-size: 11px;
+    background: #dcdcdc; 
+    box-shadow: inset 3px 3px 5px rgba(0,0,0,0.2), inset -1px -1px 2px rgba(255,255,255,0.7);
+}
+
+.color-btn { 
+    border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+    cursor: pointer; color: white; font-weight: bold; font-size: 11px;
+}
+
+/* 3D Effecten Mastermind */
+.pin, .color-btn, .pin-socket[class*="c-"] {
+    background-image: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4), transparent);
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,0,0,0.1);
+    text-shadow: 0px 1px 2px rgba(0,0,0,0.5);
+}
+
+.pin {
+    width: 35px; height: 35px; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    color: white; font-weight: bold; font-size: 11px;
+}
+
+/* Mastermind Animaties */
+.guess-slots .pin, .current-guess-row .pin-socket[class*="c-"] {
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Kleurdefinities */
+.c-1 { background-color: var(--pin-1); } .c-1::after{content:"K";}
+.c-2 { background-color: var(--pin-2); } .c-2::after{content:"CV";}
+.c-3 { background-color: var(--pin-3); } .c-3::after{content:"VLV";font-size:8px;}
+.c-4 { background-color: var(--pin-4); } .c-4::after{content:"CM";}
+.c-5 { background-color: var(--pin-5); } .c-5::after{content:"A";}
+.c-6 { background-color: var(--pin-6); } .c-6::after{content:"VL";}
+
+/* Fix voor perfect ronde balletjes */
+.pin, .color-btn, .pin-socket {
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    width: 35px; height: 35px;
+    min-width: 35px; min-height: 35px;
+}
+
+/* =========================================
+   9. FX ANIMATIES (JUICINESS)
+   ========================================= */
+.shake-anim {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
