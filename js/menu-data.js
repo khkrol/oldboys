@@ -15,7 +15,7 @@ const menuData = [
         category: "Scoutingnetwerk",
         items: [
 
-            { id: "dokter", title: "Hoofdscout", icon: "🚑", url: "tools/mainstat.html" },
+            { id: "hoofdscout", title: "Hoofdscout", icon: "🕵️", url: "tools/mainstat.html" },
             { id: "keeper", title: "Keeperscout", icon: "🧤", url: "tools/keeper.html" },
             { id: "scout", title: "Jeugdscout", icon: "⭐", url: "tools/scoutscore.html" },
         ]
